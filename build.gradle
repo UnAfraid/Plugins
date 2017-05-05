@@ -1,8 +1,20 @@
+plugins {
+	id "com.github.unafraid.gradle.git-repo-plugin" version "2.0.3"
+}
+
 subprojects {
 	apply plugin: "eclipse"
 	apply plugin: "java"
+	apply plugin: "maven-publish"
+	apply plugin: "com.github.unafraid.gradle.git-repo-plugin"
 	
 	sourceCompatibility = JavaVersion.VERSION_1_8
+	
+	gitPublishConfig {
+		org = "UnAfraid"
+		repo = "Plugins"
+		branch = "releases"
+	}
 	
 	repositories {
 		mavenCentral()
@@ -23,6 +35,30 @@ subprojects {
 
 	tasks.cleanEclipse.doLast {
 		delete(".settings")
+	}
+	
+		tasks.withType(JavaCompile) {
+		options.encoding = "UTF-8"
+	}
+
+	task sourceJar(type: Jar) {
+		classifier "sources"
+		from sourceSets.main.allJava
+	}
+	 
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+
+				artifact sourceJar
+			}
+		}
+		repositories {
+			maven {
+				url "file://${gitPublishConfig.home}/${gitPublishConfig.org}/${gitPublishConfig.repo}/releases"
+			}
+		}
 	}
 }
 
