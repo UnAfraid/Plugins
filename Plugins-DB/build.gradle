@@ -1,4 +1,0 @@
-dependencies {
-	compile project(":Plugins-API")
-	compile(group: 'org.jdbi', name: 'jdbi', version: '2.78')
-}
