@@ -16,25 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins;
-
-import com.github.unafraid.plugins.util.ClassPathUtil;
+package com.github.unafraid.plugins.exceptions;
 
 /**
  * @author UnAfraid
  */
-public class DatabaseProvider
+public class PluginRuntimeException extends RuntimeException
 {
-	public static IDatabaseFactory DATABASE_FACTORY;
-	static
+	private static final long serialVersionUID = 3021042924909977223L;
+	
+	public PluginRuntimeException(String cause)
 	{
-		try
-		{
-			DATABASE_FACTORY = ClassPathUtil.getInstanceOfExtending(IDatabaseFactory.class);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
+		super(cause);
+	}
+	
+	public PluginRuntimeException(Throwable t)
+	{
+		super(t);
 	}
 }

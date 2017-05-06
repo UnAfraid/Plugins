@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins.data.sql.dao;
+package com.github.unafraid.plugins.db.dao;
 
 import java.io.Closeable;
 import java.util.List;
@@ -27,8 +27,8 @@ import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
-import com.github.unafraid.plugins.data.sql.dao.dto.Plugin;
-import com.github.unafraid.plugins.data.sql.dao.mapper.PluginMapper;
+import com.github.unafraid.plugins.db.dao.dto.Plugin;
+import com.github.unafraid.plugins.db.dao.mapper.PluginMapper;
 
 /**
  * @author UnAfraid

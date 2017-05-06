@@ -30,8 +30,8 @@ import java.util.Scanner;
 import java.util.Set;
 
 import com.github.unafraid.plugins.AbstractPlugin;
-import com.github.unafraid.plugins.DatabaseProvider;
-import com.github.unafraid.plugins.PluginException;
+import com.github.unafraid.plugins.db.DatabaseProvider;
+import com.github.unafraid.plugins.exceptions.PluginException;
 import com.github.unafraid.plugins.installers.IPluginInstaller;
 
 /**
@@ -168,7 +168,7 @@ public class DatabaseInstaller implements IPluginInstaller
 		{
 			return false;
 		}
-		DatabaseInstaller other = (DatabaseInstaller) obj;
+		final DatabaseInstaller other = (DatabaseInstaller) obj;
 		if (_tables == null)
 		{
 			if (other._tables != null)

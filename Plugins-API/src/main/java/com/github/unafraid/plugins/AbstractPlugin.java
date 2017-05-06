@@ -20,13 +20,19 @@ package com.github.unafraid.plugins;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.unafraid.plugins.conditions.ConditionType;
 import com.github.unafraid.plugins.conditions.PluginConditions;
-import com.github.unafraid.plugins.installers.db.DatabaseInstaller;
+import com.github.unafraid.plugins.exceptions.PluginException;
+import com.github.unafraid.plugins.exceptions.PluginRuntimeException;
+import com.github.unafraid.plugins.installers.IPluginInstaller;
 import com.github.unafraid.plugins.installers.file.FileInstaller;
 import com.github.unafraid.plugins.migrations.PluginMigrations;
+import com.github.unafraid.plugins.util.ThrowableRunnable;
 
 /**
  * @author UnAfraid
@@ -34,9 +40,9 @@ import com.github.unafraid.plugins.migrations.PluginMigrations;
 public abstract class AbstractPlugin
 {
 	private final PluginConditions _conditions = new PluginConditions();
-	private final DatabaseInstaller _databaseInstaller = new DatabaseInstaller();
 	private final FileInstaller _fileInstaller = new FileInstaller();
 	private final PluginMigrations _migrations = new PluginMigrations();
+	private final List<IPluginInstaller> _installers = new ArrayList<>(Collections.singleton(_fileInstaller));
 	private final AtomicReference<PluginState> _state = new AtomicReference<>(PluginState.AVAILABLE);
 	
 	public abstract String getName();
@@ -49,15 +55,20 @@ public abstract class AbstractPlugin
 	
 	public abstract int getVersion();
 	
-	protected abstract void setup(FileInstaller fileInstaller, DatabaseInstaller dbInstaller, PluginMigrations migrations, PluginConditions pluginConditions);
+	protected abstract void setup(FileInstaller fileInstaller, PluginMigrations migrations, PluginConditions pluginConditions);
 	
-	protected abstract void initialize();
+	public abstract void onStart();
 	
-	public abstract void shutdown();
+	public abstract void onStop();
 	
-	public final boolean setState(PluginState currentState, PluginState newState)
+	private final boolean setState(PluginState currentState, PluginState newState)
 	{
-		return _state.compareAndSet(currentState, newState);
+		if (_state.compareAndSet(currentState, newState))
+		{
+			onStateChanged(currentState, newState);
+			return true;
+		}
+		return false;
 	}
 	
 	public final PluginState getState()
@@ -65,33 +76,82 @@ public abstract class AbstractPlugin
 		return _state.get();
 	}
 	
+	public void onStateChanged(PluginState oldState, PluginState newState)
+	{
+		
+	}
+	
 	protected final void init()
 	{
-		setup(_fileInstaller, _databaseInstaller, _migrations, _conditions);
+		try
+		{
+			verifyStateAndRun(() -> setup(_fileInstaller, _migrations, _conditions), PluginState.AVAILABLE, PluginState.INITIALIZED);
+		}
+		catch (PluginException e)
+		{
+			throw new PluginRuntimeException(e);
+		}
 	}
 	
 	public final void start() throws PluginException
 	{
-		_conditions.testConditions(ConditionType.RUNTIME, this);
-		initialize();
+		_conditions.testConditions(ConditionType.START, this);
+		verifyStateAndRun(this::onStart, PluginState.INSTALLED, PluginState.STARTED);
+	}
+	
+	public final void stop() throws PluginException
+	{
+		_conditions.testConditions(ConditionType.STOP, this);
+		verifyStateAndRun(this::onStop, PluginState.STARTED, PluginState.INSTALLED);
 	}
 	
 	public final void install() throws PluginException
 	{
 		_conditions.testConditions(ConditionType.INSTALL, this);
-		_databaseInstaller.install(this);
-		_fileInstaller.install(this);
+		verifyStateAndRun(() ->
+		{
+			for (IPluginInstaller installer : _installers)
+			{
+				installer.install(this);
+			}
+		}, PluginState.INITIALIZED, PluginState.INSTALLED);
 	}
 	
 	public final void uninstall() throws PluginException
 	{
-		_databaseInstaller.uninstall(this);
-		_fileInstaller.uninstall(this);
+		_conditions.testConditions(ConditionType.UNINSTALL, this);
+		verifyStateAndRun(() ->
+		{
+			for (IPluginInstaller installer : _installers)
+			{
+				installer.uninstall(this);
+			}
+		}, PluginState.INSTALLED, PluginState.INITIALIZED);
 	}
 	
 	public final void migrate(int from, int to) throws PluginException
 	{
-		_migrations.migrate(from, to, this);
+		_conditions.testConditions(ConditionType.MIGRATION, this);
+		verifyStateAndRun(() -> _migrations.migrate(from, to, this), PluginState.INSTALLED, getState());
+	}
+	
+	private void verifyStateAndRun(ThrowableRunnable run, PluginState expectedState, PluginState newState) throws PluginException
+	{
+		final PluginState currentState = getState();
+		if (expectedState == currentState)
+		{
+			if (setState(currentState, newState))
+			{
+				run.run();
+			}
+			else
+			{
+				throw new PluginException("Failed to set state expected " + expectedState + " but got changed suddenly to " + getState());
+			}
+			return;
+		}
+		
+		throw new PluginException("Plugin proceed, expected state " + expectedState + " but found " + currentState);
 	}
 	
 	public final PluginConditions getConditions()
@@ -99,14 +159,14 @@ public abstract class AbstractPlugin
 		return _conditions;
 	}
 	
-	public final DatabaseInstaller getDatabaseInstaller()
-	{
-		return _databaseInstaller;
-	}
-	
 	public final FileInstaller getFileInstaller()
 	{
 		return _fileInstaller;
+	}
+	
+	public List<IPluginInstaller> getInstallers()
+	{
+		return _installers;
 	}
 	
 	public final PluginMigrations getMigrations()
@@ -153,7 +213,7 @@ public abstract class AbstractPlugin
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((_conditions == null) ? 0 : _conditions.hashCode());
-		result = (prime * result) + ((_databaseInstaller == null) ? 0 : _databaseInstaller.hashCode());
+		result = (prime * result) + ((_installers == null) ? 0 : _installers.hashCode());
 		result = (prime * result) + ((_fileInstaller == null) ? 0 : _fileInstaller.hashCode());
 		result = (prime * result) + ((_migrations == null) ? 0 : _migrations.hashCode());
 		result = (prime * result) + ((_state == null) ? 0 : _state.hashCode());
@@ -187,14 +247,14 @@ public abstract class AbstractPlugin
 		{
 			return false;
 		}
-		if (_databaseInstaller == null)
+		if (_installers == null)
 		{
-			if (other._databaseInstaller != null)
+			if (other._installers != null)
 			{
 				return false;
 			}
 		}
-		else if (!_databaseInstaller.equals(other._databaseInstaller))
+		else if (!_installers.equals(other._installers))
 		{
 			return false;
 		}

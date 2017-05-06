@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.unafraid.plugins.AbstractPlugin;
-import com.github.unafraid.plugins.PluginException;
+import com.github.unafraid.plugins.exceptions.PluginException;
 import com.github.unafraid.plugins.installers.IPluginInstaller;
 
 /**

@@ -16,16 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins;
+package com.github.unafraid.plugins.db.dao.mapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.skife.jdbi.v2.StatementContext;
+import org.skife.jdbi.v2.tweak.ResultSetMapper;
+
+import com.github.unafraid.plugins.db.dao.dto.Plugin;
 
 /**
  * @author UnAfraid
  */
-public enum PluginState
+public class PluginMapper implements ResultSetMapper<Plugin>
 {
-	AVAILABLE,
-	INITIALIZED,
-	INSTALLED,
-	STARTED,
-	CANT_START;
+	@Override
+	public Plugin map(int index, ResultSet r, StatementContext ctx) throws SQLException
+	{
+		return new Plugin(r.getInt("id"), r.getString("name"), r.getInt("version"));
+	}
 }

@@ -16,20 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins;
+package com.github.unafraid.plugins.util;
 
-import java.sql.Connection;
-
-import javax.sql.DataSource;
+import com.github.unafraid.plugins.exceptions.PluginRuntimeException;
 
 /**
  * @author UnAfraid
  */
-public interface IDatabaseFactory
+public interface ThrowableRunnable extends Runnable
 {
-	Connection getConnection();
+	@Override
+	default void run()
+	{
+		try
+		{
+			runOrThrow();
+		}
+		catch (Throwable t)
+		{
+			throw new PluginRuntimeException(t);
+		}
+	}
 	
-	DataSource getDataSource();
-	
-	void shutdown();
+	void runOrThrow() throws Throwable;
 }

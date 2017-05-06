@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins;
+package com.github.unafraid.plugins.repositories;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -31,6 +31,8 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.unafraid.plugins.AbstractPlugin;
 
 /**
  * @author UnAfraid

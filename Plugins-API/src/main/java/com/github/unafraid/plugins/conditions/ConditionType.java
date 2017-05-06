@@ -24,5 +24,8 @@ package com.github.unafraid.plugins.conditions;
 public enum ConditionType
 {
 	INSTALL,
-	RUNTIME
+	UNINSTALL,
+	MIGRATION,
+	START,
+	STOP
 }

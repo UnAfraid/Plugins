@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.github.unafraid.plugins.AbstractPlugin;
-import com.github.unafraid.plugins.PluginException;
+import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
  * @author UnAfraid

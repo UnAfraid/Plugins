@@ -16,66 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins.data.sql.dao.dto;
+package com.github.unafraid.plugins.db;
+
+import org.skife.jdbi.v2.DBI;
+
+import com.github.unafraid.plugins.util.ClassPathUtil;
 
 /**
  * @author UnAfraid
  */
-public class Plugin
+public class DatabaseProvider
 {
-	private final int id;
-	private String name;
-	private int version;
-	
-	/**
-	 * @param id
-	 * @param name
-	 * @param version
-	 */
-	public Plugin(int id, String name, int version)
+	public static IDatabaseFactory DATABASE_FACTORY;
+	public static DBI DBI;
+	static
 	{
-		this.id = id;
-		this.name = name;
-		this.version = version;
+		try
+		{
+			DATABASE_FACTORY = ClassPathUtil.getInstanceOfExtending(IDatabaseFactory.class);
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		
+		try
+		{
+			DBI = new DBI(DATABASE_FACTORY.getDataSource());
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 	
-	/**
-	 * @return the id
-	 */
-	public int getId()
+	private DatabaseProvider()
 	{
-		return id;
-	}
-	
-	/**
-	 * @return the name
-	 */
-	public String getName()
-	{
-		return name;
-	}
-	
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-	
-	/**
-	 * @return the version
-	 */
-	public int getVersion()
-	{
-		return version;
-	}
-	
-	/**
-	 * @param version the version to set
-	 */
-	public void setVersion(int version)
-	{
-		this.version = version;
 	}
 }

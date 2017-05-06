@@ -16,13 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins;
+package com.github.unafraid.plugins.repositories;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.github.unafraid.plugins.data.sql.dao.PluginsDAO;
-import com.github.unafraid.plugins.data.sql.dao.dto.Plugin;
+import com.github.unafraid.plugins.AbstractPlugin;
+import com.github.unafraid.plugins.db.DatabaseProvider;
+import com.github.unafraid.plugins.db.dao.PluginsDAO;
+import com.github.unafraid.plugins.db.dao.dto.Plugin;
 
 /**
  * @author UnAfraid
@@ -30,7 +32,7 @@ import com.github.unafraid.plugins.data.sql.dao.dto.Plugin;
  */
 public class DBPluginRepository<T extends AbstractPlugin> extends PluginRepository<T>
 {
-	private static final PluginsDAO PLUGINS_DAO = DBIProvider.DBI.open(PluginsDAO.class);
+	private static final PluginsDAO PLUGINS_DAO = DatabaseProvider.DBI.open(PluginsDAO.class);
 	
 	public T getInstalledPlugin(String name)
 	{

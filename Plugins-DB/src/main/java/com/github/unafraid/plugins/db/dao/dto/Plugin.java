@@ -16,24 +16,66 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins.data.sql.dao.mapper;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
-
-import com.github.unafraid.plugins.data.sql.dao.dto.Plugin;
+package com.github.unafraid.plugins.db.dao.dto;
 
 /**
  * @author UnAfraid
  */
-public class PluginMapper implements ResultSetMapper<Plugin>
+public class Plugin
 {
-	@Override
-	public Plugin map(int index, ResultSet r, StatementContext ctx) throws SQLException
+	private final int id;
+	private String name;
+	private int version;
+	
+	/**
+	 * @param id
+	 * @param name
+	 * @param version
+	 */
+	public Plugin(int id, String name, int version)
 	{
-		return new Plugin(r.getInt("id"), r.getString("name"), r.getInt("version"));
+		this.id = id;
+		this.name = name;
+		this.version = version;
+	}
+	
+	/**
+	 * @return the id
+	 */
+	public int getId()
+	{
+		return id;
+	}
+	
+	/**
+	 * @return the name
+	 */
+	public String getName()
+	{
+		return name;
+	}
+	
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	
+	/**
+	 * @return the version
+	 */
+	public int getVersion()
+	{
+		return version;
+	}
+	
+	/**
+	 * @param version the version to set
+	 */
+	public void setVersion(int version)
+	{
+		this.version = version;
 	}
 }

@@ -16,14 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins;
+package com.github.unafraid.plugins.db;
 
-import org.skife.jdbi.v2.DBI;
+import java.sql.Connection;
+
+import javax.sql.DataSource;
 
 /**
  * @author UnAfraid
  */
-public class DBIProvider
+public interface IDatabaseFactory
 {
-	public static final DBI DBI = new DBI(DatabaseProvider.DATABASE_FACTORY.getDataSource());
+	Connection getConnection();
+	
+	DataSource getDataSource();
+	
+	void shutdown();
 }
