@@ -61,7 +61,7 @@ public abstract class AbstractPlugin
 	
 	protected abstract void onStop();
 	
-	public final boolean setState(PluginState currentState, PluginState newState)
+	protected final boolean setState(PluginState currentState, PluginState newState)
 	{
 		if (_state.compareAndSet(currentState, newState))
 		{

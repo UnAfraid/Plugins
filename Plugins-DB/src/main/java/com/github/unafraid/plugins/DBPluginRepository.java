@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.unafraid.plugins.repositories;
+package com.github.unafraid.plugins;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.unafraid.plugins.AbstractPlugin;
+import com.github.unafraid.plugins.PluginRepository;
 import com.github.unafraid.plugins.PluginState;
 import com.github.unafraid.plugins.db.DatabaseProvider;
 import com.github.unafraid.plugins.db.dao.PluginsDAO;
