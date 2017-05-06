@@ -20,6 +20,9 @@ package com.github.unafraid.plugins.installers.db;
 
 import java.util.Optional;
 
+/**
+ * @author UnAfraid
+ */
 public class PluginDatabaseTable
 {
 	private final String _source;

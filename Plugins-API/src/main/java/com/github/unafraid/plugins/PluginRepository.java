@@ -45,7 +45,7 @@ public class PluginRepository<T extends AbstractPlugin>
 	public final void scan(Class<T> pluginClass)
 	{
 		// Scan for plug-ins deployed as 'jar' files
-		int previousSize = _plugins.size();
+		final int previousSize = _plugins.size();
 		try
 		{
 			final Path plugins = Paths.get("plugins");
@@ -85,7 +85,7 @@ public class PluginRepository<T extends AbstractPlugin>
 		
 		if (previousSize != _plugins.size())
 		{
-			LOGGER.info("Discovered {} plugins", _plugins.size());
+			LOGGER.info("Discovered {} -> {} plugins", previousSize, _plugins.size());
 		}
 	}
 	

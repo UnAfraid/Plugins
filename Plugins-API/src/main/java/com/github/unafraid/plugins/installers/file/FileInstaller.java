@@ -229,4 +229,55 @@ public class FileInstaller implements IPluginInstaller
 			throw new PluginException(e);
 		}
 	}
+	
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((_directories == null) ? 0 : _directories.hashCode());
+		result = (prime * result) + ((_files == null) ? 0 : _files.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+		if (obj == null)
+		{
+			return false;
+		}
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+		final FileInstaller other = (FileInstaller) obj;
+		if (_directories == null)
+		{
+			if (other._directories != null)
+			{
+				return false;
+			}
+		}
+		else if (!_directories.equals(other._directories))
+		{
+			return false;
+		}
+		if (_files == null)
+		{
+			if (other._files != null)
+			{
+				return false;
+			}
+		}
+		else if (!_files.equals(other._files))
+		{
+			return false;
+		}
+		return true;
+	}
 }

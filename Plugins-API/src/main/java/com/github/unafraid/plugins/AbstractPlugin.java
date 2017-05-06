@@ -146,4 +146,91 @@ public abstract class AbstractPlugin
 	{
 		return 0;
 	}
+	
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((_conditions == null) ? 0 : _conditions.hashCode());
+		result = (prime * result) + ((_databaseInstaller == null) ? 0 : _databaseInstaller.hashCode());
+		result = (prime * result) + ((_fileInstaller == null) ? 0 : _fileInstaller.hashCode());
+		result = (prime * result) + ((_migrations == null) ? 0 : _migrations.hashCode());
+		result = (prime * result) + ((_state == null) ? 0 : _state.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+		if (obj == null)
+		{
+			return false;
+		}
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+		final AbstractPlugin other = (AbstractPlugin) obj;
+		if (_conditions == null)
+		{
+			if (other._conditions != null)
+			{
+				return false;
+			}
+		}
+		else if (!_conditions.equals(other._conditions))
+		{
+			return false;
+		}
+		if (_databaseInstaller == null)
+		{
+			if (other._databaseInstaller != null)
+			{
+				return false;
+			}
+		}
+		else if (!_databaseInstaller.equals(other._databaseInstaller))
+		{
+			return false;
+		}
+		if (_fileInstaller == null)
+		{
+			if (other._fileInstaller != null)
+			{
+				return false;
+			}
+		}
+		else if (!_fileInstaller.equals(other._fileInstaller))
+		{
+			return false;
+		}
+		if (_migrations == null)
+		{
+			if (other._migrations != null)
+			{
+				return false;
+			}
+		}
+		else if (!_migrations.equals(other._migrations))
+		{
+			return false;
+		}
+		if (_state == null)
+		{
+			if (other._state != null)
+			{
+				return false;
+			}
+		}
+		else if (!_state.equals(other._state))
+		{
+			return false;
+		}
+		return true;
+	}
 }

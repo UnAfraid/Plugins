@@ -56,4 +56,45 @@ public class PluginMigrations
 			.forEach(migration -> migration.migrate(plugin));
 		//@formatter:off
 	}
+
+	
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((_migrations == null) ? 0 : _migrations.hashCode());
+		return result;
+	}
+
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+		if (obj == null)
+		{
+			return false;
+		}
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+		final PluginMigrations other = (PluginMigrations) obj;
+		if (_migrations == null)
+		{
+			if (other._migrations != null)
+			{
+				return false;
+			}
+		}
+		else if (!_migrations.equals(other._migrations))
+		{
+			return false;
+		}
+		return true;
+	}
 }

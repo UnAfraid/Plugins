@@ -52,4 +52,55 @@ public class PluginFile
 		sj.add("destination: " + _destination);
 		return sj.toString();
 	}
+	
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((_destination == null) ? 0 : _destination.hashCode());
+		result = (prime * result) + ((_source == null) ? 0 : _source.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+		if (obj == null)
+		{
+			return false;
+		}
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+		final PluginFile other = (PluginFile) obj;
+		if (_destination == null)
+		{
+			if (other._destination != null)
+			{
+				return false;
+			}
+		}
+		else if (!_destination.equals(other._destination))
+		{
+			return false;
+		}
+		if (_source == null)
+		{
+			if (other._source != null)
+			{
+				return false;
+			}
+		}
+		else if (!_source.equals(other._source))
+		{
+			return false;
+		}
+		return true;
+	}
 }
