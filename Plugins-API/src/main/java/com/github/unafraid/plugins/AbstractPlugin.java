@@ -57,9 +57,9 @@ public abstract class AbstractPlugin
 	
 	protected abstract void setup(FileInstaller fileInstaller, PluginMigrations migrations, PluginConditions pluginConditions);
 	
-	public abstract void onStart();
+	protected abstract void onStart();
 	
-	public abstract void onStop();
+	protected abstract void onStop();
 	
 	private final boolean setState(PluginState currentState, PluginState newState)
 	{
