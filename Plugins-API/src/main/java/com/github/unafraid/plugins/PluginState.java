@@ -26,6 +26,5 @@ public enum PluginState
 	AVAILABLE,
 	INITIALIZED,
 	INSTALLED,
-	STARTED,
-	CANT_START;
+	STARTED;
 }
