@@ -143,12 +143,9 @@ public abstract class AbstractPlugin
 			if (setState(currentState, newState))
 			{
 				run.run();
+				return;
 			}
-			else
-			{
-				throw new PluginException("Failed to set state expected " + expectedState + " but got changed suddenly to " + getState());
-			}
-			return;
+			throw new PluginException("Failed to set state expected " + expectedState + " but got changed suddenly to " + getState());
 		}
 		
 		throw new PluginException("Plugin proceed, expected state " + expectedState + " but found " + currentState);
