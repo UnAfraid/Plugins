@@ -21,10 +21,15 @@ package com.github.unafraid.plugins.repositories;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.unafraid.plugins.AbstractPlugin;
+import com.github.unafraid.plugins.PluginState;
 import com.github.unafraid.plugins.db.DatabaseProvider;
 import com.github.unafraid.plugins.db.dao.PluginsDAO;
 import com.github.unafraid.plugins.db.dao.dto.Plugin;
+import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
  * @author UnAfraid
@@ -32,7 +37,44 @@ import com.github.unafraid.plugins.db.dao.dto.Plugin;
  */
 public class DBPluginRepository<T extends AbstractPlugin> extends PluginRepository<T>
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DBPluginRepository.class);
+	
 	private static final PluginsDAO PLUGINS_DAO = DatabaseProvider.DBI.open(PluginsDAO.class);
+	
+	@Override
+	public void startAll()
+	{
+		getInstalledPlugins().forEach(plugin ->
+		{
+			try
+			{
+				if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
+				{
+					plugin.start();
+				}
+			}
+			catch (PluginException e)
+			{
+				LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
+			}
+		});
+	}
+	
+	@Override
+	public void stopAll()
+	{
+		getInstalledPlugins().forEach(plugin ->
+		{
+			try
+			{
+				plugin.stop();
+			}
+			catch (PluginException e)
+			{
+				LOGGER.warn("Failed to stop plugin {}", plugin.getName(), e);
+			}
+		});
+	}
 	
 	public T getInstalledPlugin(String name)
 	{

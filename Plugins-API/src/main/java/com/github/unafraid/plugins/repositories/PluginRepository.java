@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.unafraid.plugins.AbstractPlugin;
+import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
  * @author UnAfraid
@@ -104,6 +105,36 @@ public class PluginRepository<T extends AbstractPlugin>
 	public final Map<String, Map<Integer, T>> getAllPlugins()
 	{
 		return _plugins;
+	}
+	
+	public void startAll()
+	{
+		getAvailablePlugins().forEach(plugin ->
+		{
+			try
+			{
+				plugin.start();
+			}
+			catch (PluginException e)
+			{
+				LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
+			}
+		});
+	}
+	
+	public void stopAll()
+	{
+		getAvailablePlugins().forEach(plugin ->
+		{
+			try
+			{
+				plugin.stop();
+			}
+			catch (PluginException e)
+			{
+				LOGGER.warn("Failed to stop plugin {}", plugin.getName(), e);
+			}
+		});
 	}
 	
 	public T getAvailablePlugin(String name)
