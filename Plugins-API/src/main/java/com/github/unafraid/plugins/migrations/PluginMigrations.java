@@ -46,7 +46,7 @@ public class PluginMigrations
 	{
 		if (from >= to)
 		{
-			throw new PluginException("Canno migrate from >= to");
+			throw new PluginException("Cannot migrate from " + from + " >= to" + to + "!");
 		}
 		
 		//@formatter:off
