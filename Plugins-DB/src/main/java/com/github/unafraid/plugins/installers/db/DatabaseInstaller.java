@@ -40,7 +40,7 @@ import com.github.unafraid.plugins.installers.IPluginInstaller;
  */
 public class DatabaseInstaller implements IPluginInstaller
 {
-	private final Set<PluginDatabaseFile> _installTables = new HashSet<>();
+	private final Set<PluginDatabaseFile> _installFiles = new HashSet<>();
 	private final Set<PluginDatabaseFile> _uninstallFiles = new HashSet<>();
 	
 	/**
@@ -51,7 +51,7 @@ public class DatabaseInstaller implements IPluginInstaller
 	 */
 	public void addTable(String source, Optional<String> name, Optional<String> database)
 	{
-		_installTables.add(new PluginDatabaseFile(source, name, database));
+		_installFiles.add(new PluginDatabaseFile(source, name, database));
 	}
 	
 	/**
@@ -68,9 +68,9 @@ public class DatabaseInstaller implements IPluginInstaller
 	/**
 	 * @return Set of database plugin files that are going to be executed when plugin install is requested
 	 */
-	public Set<PluginDatabaseFile> getInstallTables()
+	public Set<PluginDatabaseFile> getInstallFiles()
 	{
-		return _installTables;
+		return _installFiles;
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class DatabaseInstaller implements IPluginInstaller
 			// Prevent half-way execution
 			con.setAutoCommit(false);
 			
-			for (PluginDatabaseFile file : _installTables)
+			for (PluginDatabaseFile file : _installFiles)
 			{
 				String currentDatabase = "";
 				try (ResultSet rs = st.executeQuery("SELECT DATABASE()"))
@@ -259,7 +259,7 @@ public class DatabaseInstaller implements IPluginInstaller
 	{
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((_installTables == null) ? 0 : _installTables.hashCode());
+		result = (prime * result) + ((_installFiles == null) ? 0 : _installFiles.hashCode());
 		result = (prime * result) + ((_uninstallFiles == null) ? 0 : _uninstallFiles.hashCode());
 		return result;
 	}
@@ -280,14 +280,14 @@ public class DatabaseInstaller implements IPluginInstaller
 			return false;
 		}
 		final DatabaseInstaller other = (DatabaseInstaller) obj;
-		if (_installTables == null)
+		if (_installFiles == null)
 		{
-			if (other._installTables != null)
+			if (other._installFiles != null)
 			{
 				return false;
 			}
 		}
-		else if (!_installTables.equals(other._installTables))
+		else if (!_installFiles.equals(other._installFiles))
 		{
 			return false;
 		}
