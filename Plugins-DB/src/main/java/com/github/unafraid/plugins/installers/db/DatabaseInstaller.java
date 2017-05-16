@@ -35,20 +35,50 @@ import com.github.unafraid.plugins.exceptions.PluginException;
 import com.github.unafraid.plugins.installers.IPluginInstaller;
 
 /**
+ * Database installer that allows database queries upon install/uninstall, executed automatically as plugin is installed or uninstalled
  * @author UnAfraid
  */
 public class DatabaseInstaller implements IPluginInstaller
 {
-	private final Set<PluginDatabaseTable> _tables = new HashSet<>();
+	private final Set<PluginDatabaseFile> _installTables = new HashSet<>();
+	private final Set<PluginDatabaseFile> _uninstallFiles = new HashSet<>();
 	
-	public void addTable(String source, String name, Optional<String> database)
+	/**
+	 * Registers install file scripts, executed when install of plugin is requested
+	 * @param source the source of the resource file to execute
+	 * @param name if present makes sure table doesn't exists before executing resource file
+	 * @param database if present switches the database over to specified one before executing resource file
+	 */
+	public void addTable(String source, Optional<String> name, Optional<String> database)
 	{
-		_tables.add(new PluginDatabaseTable(source, name, database));
+		_installTables.add(new PluginDatabaseFile(source, name, database));
 	}
 	
-	public Set<PluginDatabaseTable> getDatabaseTables()
+	/**
+	 * Registers uninstall file script, executed when uninstall of plugin is requested
+	 * @param source the source of the resource file to execute
+	 * @param name if present makes sure table exists before executing resource file
+	 * @param database if present switches the database over to specified one before executing resource file
+	 */
+	public void addUninstallFile(String source, Optional<String> name, Optional<String> database)
 	{
-		return _tables;
+		_uninstallFiles.add(new PluginDatabaseFile(source, name, database));
+	}
+	
+	/**
+	 * @return Set of database plugin files that are going to be executed when plugin install is requested
+	 */
+	public Set<PluginDatabaseFile> getInstallTables()
+	{
+		return _installTables;
+	}
+	
+	/**
+	 * @return Set of database plugin files that are going to be executed when plugin uninstall is requested
+	 */
+	public Set<PluginDatabaseFile> getUninstallFiles()
+	{
+		return _uninstallFiles;
 	}
 	
 	@Override
@@ -60,7 +90,7 @@ public class DatabaseInstaller implements IPluginInstaller
 			// Prevent half-way execution
 			con.setAutoCommit(false);
 			
-			for (PluginDatabaseTable table : _tables)
+			for (PluginDatabaseFile file : _installTables)
 			{
 				String currentDatabase = "";
 				try (ResultSet rs = st.executeQuery("SELECT DATABASE()"))
@@ -71,55 +101,35 @@ public class DatabaseInstaller implements IPluginInstaller
 					}
 				}
 				
-				if (table.getDatabase().isPresent())
+				if (file.getDatabase().isPresent())
 				{
 					// Switch database
-					st.execute("USE " + table.getDatabase().get());
+					st.execute("USE " + file.getDatabase().get());
 				}
 				
 				// Check for table existence
-				try (PreparedStatement ps = con.prepareStatement("SHOW TABLES LIKE ?"))
+				if (file.getName().isPresent())
 				{
-					ps.setString(1, table.getName());
-					try (ResultSet rs = ps.executeQuery())
+					try (PreparedStatement ps = con.prepareStatement("SHOW TABLES LIKE ?"))
 					{
-						if (!rs.next())
+						ps.setString(1, file.getName().get());
+						try (ResultSet rs = ps.executeQuery())
 						{
-							try (InputStream inputStream = getClass().getResourceAsStream(table.getSource());
-								InputStreamReader reader = new InputStreamReader(inputStream);
-								Scanner scn = new Scanner(reader))
+							if (!rs.next())
 							{
-								StringBuilder sb = new StringBuilder();
-								while (scn.hasNextLine())
-								{
-									String line = scn.nextLine();
-									if (line.startsWith("--"))
-									{
-										continue;
-									}
-									else if (line.contains("--"))
-									{
-										line = line.split("--")[0];
-									}
-									
-									line = line.trim();
-									if (!line.isEmpty())
-									{
-										sb.append(line + System.lineSeparator());
-									}
-									
-									if (line.endsWith(";"))
-									{
-										st.execute(sb.toString());
-										sb = new StringBuilder();
-									}
-								}
+								// Execute the resource
+								executeResource(file.getSource(), st);
 							}
 						}
 					}
 				}
+				else
+				{
+					// Execute the resource
+					executeResource(file.getSource(), st);
+				}
 				
-				if (table.getDatabase().isPresent())
+				if (file.getDatabase().isPresent())
 				{
 					// Switch database back to its original state
 					st.execute("USE " + currentDatabase);
@@ -141,7 +151,107 @@ public class DatabaseInstaller implements IPluginInstaller
 	@Override
 	public void uninstall(AbstractPlugin plugin) throws PluginException
 	{
-		throw new PluginException("Not done");
+		try (Connection con = DatabaseProvider.DATABASE_FACTORY.getConnection();
+			Statement st = con.createStatement())
+		{
+			// Prevent half-way execution
+			con.setAutoCommit(false);
+			
+			for (PluginDatabaseFile file : _uninstallFiles)
+			{
+				String currentDatabase = "";
+				try (ResultSet rs = st.executeQuery("SELECT DATABASE()"))
+				{
+					if (rs.next())
+					{
+						currentDatabase = rs.getString(1);
+					}
+				}
+				
+				if (file.getDatabase().isPresent())
+				{
+					// Switch database
+					st.execute("USE " + file.getDatabase().get());
+				}
+				
+				// Check for table existence
+				if (file.getName().isPresent())
+				{
+					try (PreparedStatement ps = con.prepareStatement("SHOW TABLES LIKE ?"))
+					{
+						ps.setString(1, file.getName().get());
+						try (ResultSet rs = ps.executeQuery())
+						{
+							if (rs.next())
+							{
+								// Execute the resource
+								executeResource(file.getSource(), st);
+							}
+						}
+					}
+				}
+				else
+				{
+					// Execute the resource
+					executeResource(file.getSource(), st);
+				}
+				if (file.getDatabase().isPresent())
+				{
+					// Switch database back to its original state
+					st.execute("USE " + currentDatabase);
+				}
+			}
+			
+			if (!con.getAutoCommit())
+			{
+				con.commit();
+				con.setAutoCommit(true);
+			}
+		}
+		catch (Exception e)
+		{
+			throw new PluginException(e);
+		}
+	}
+	
+	/**
+	 * Executes the source resource file into the statement provided
+	 * @param source
+	 * @param st
+	 * @throws Exception
+	 */
+	private void executeResource(String source, Statement st) throws Exception
+	{
+		try (InputStream inputStream = getClass().getResourceAsStream(source);
+			InputStreamReader reader = new InputStreamReader(inputStream);
+			Scanner scn = new Scanner(reader))
+		{
+			StringBuilder sb = new StringBuilder();
+			while (scn.hasNextLine())
+			{
+				String line = scn.nextLine();
+				if (line.startsWith("--"))
+				{
+					continue;
+				}
+				else if (line.contains("--"))
+				{
+					line = line.split("--")[0];
+				}
+				
+				line = line.trim();
+				if (!line.isEmpty())
+				{
+					sb.append(line + System.lineSeparator());
+				}
+				
+				if (line.endsWith(";"))
+				{
+					st.execute(sb.toString());
+					sb = new StringBuilder();
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -149,7 +259,8 @@ public class DatabaseInstaller implements IPluginInstaller
 	{
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((_tables == null) ? 0 : _tables.hashCode());
+		result = (prime * result) + ((_installTables == null) ? 0 : _installTables.hashCode());
+		result = (prime * result) + ((_uninstallFiles == null) ? 0 : _uninstallFiles.hashCode());
 		return result;
 	}
 	
@@ -169,14 +280,25 @@ public class DatabaseInstaller implements IPluginInstaller
 			return false;
 		}
 		final DatabaseInstaller other = (DatabaseInstaller) obj;
-		if (_tables == null)
+		if (_installTables == null)
 		{
-			if (other._tables != null)
+			if (other._installTables != null)
 			{
 				return false;
 			}
 		}
-		else if (!_tables.equals(other._tables))
+		else if (!_installTables.equals(other._installTables))
+		{
+			return false;
+		}
+		if (_uninstallFiles == null)
+		{
+			if (other._uninstallFiles != null)
+			{
+				return false;
+			}
+		}
+		else if (!_uninstallFiles.equals(other._uninstallFiles))
 		{
 			return false;
 		}

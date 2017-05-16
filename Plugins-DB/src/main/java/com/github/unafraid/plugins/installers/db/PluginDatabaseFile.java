@@ -23,13 +23,13 @@ import java.util.Optional;
 /**
  * @author UnAfraid
  */
-public class PluginDatabaseTable
+public class PluginDatabaseFile
 {
 	private final String _source;
-	private final String _name;
+	private final Optional<String> _name;
 	private final Optional<String> _database;
 	
-	public PluginDatabaseTable(String source, String name, Optional<String> database)
+	public PluginDatabaseFile(String source, Optional<String> name, Optional<String> database)
 	{
 		_source = source;
 		_name = name;
@@ -41,7 +41,7 @@ public class PluginDatabaseTable
 		return _source;
 	}
 	
-	public String getName()
+	public Optional<String> getName()
 	{
 		return _name;
 	}
