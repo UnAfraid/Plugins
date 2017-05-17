@@ -27,8 +27,9 @@ import com.github.unafraid.plugins.util.ClassPathUtil;
  */
 public class DatabaseProvider
 {
-	public static IDatabaseFactory DATABASE_FACTORY;
-	public static DBI DBI;
+	public static final IDatabaseFactory DATABASE_FACTORY;
+	public static final DBI DBI;
+	
 	static
 	{
 		try
@@ -52,5 +53,6 @@ public class DatabaseProvider
 	
 	private DatabaseProvider()
 	{
+	   // Hide constructor.
 	}
 }
