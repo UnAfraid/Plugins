@@ -40,6 +40,7 @@ import com.github.unafraid.plugins.exceptions.PluginException;
 import com.github.unafraid.plugins.installers.IPluginInstaller;
 
 /**
+ * File Installer implementation.
  * @author UnAfraid
  */
 public class FileInstaller implements IPluginInstaller
@@ -123,7 +124,7 @@ public class FileInstaller implements IPluginInstaller
 		}
 	}
 	
-	private void installDirectory(final Path source, final Path destination) throws IOException
+	private static void installDirectory(final Path source, final Path destination) throws IOException
 	{
 		LOGGER.debug("installResources: {} -> {}", source, destination.toAbsolutePath());
 		
@@ -157,30 +158,25 @@ public class FileInstaller implements IPluginInstaller
 		});
 	}
 	
-	private void installResources(final Path source, final Path destination)
+	private static void installResources(final Path source, final Path destination)
 	{
 		LOGGER.debug("installResources: {} -> {}", source, destination.toAbsolutePath());
 		
 		try
 		{
+			if (!destination.toFile().isDirectory())
+			{
+				throw new IOException("Invalid destination!");
+			}
+			
 			if (!Files.exists(destination))
 			{
 				Files.createDirectories(destination);
 			}
 			
-			final Path dst = destination;
-			if (!Files.exists(dst.getParent()))
-			{
-				Files.createDirectories(dst.getParent());
-				LOGGER.debug("Created parent: {}", dst.getParent());
-			}
-			else
-			{
-				LOGGER.debug("Directory already exists: {}", dst.getParent());
-			}
-			LOGGER.debug("Copying file: {} -> {}", source, dst);
-			Files.copy(Files.newInputStream(source), dst, StandardCopyOption.REPLACE_EXISTING);
-			LOGGER.debug("Copied: {}", dst);
+			LOGGER.debug("Copying file: {} -> {}", source, destination);
+			Files.copy(Files.newInputStream(source), destination, StandardCopyOption.REPLACE_EXISTING);
+			LOGGER.debug("Copied: {}", destination);
 		}
 		catch (Exception e)
 		{

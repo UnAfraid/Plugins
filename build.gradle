@@ -6,6 +6,7 @@ subprojects {
 	apply plugin: "java"
 	apply plugin: "maven-publish"
 	apply plugin: "com.github.unafraid.gradle.git-repo-plugin"
+	apply plugin: "findbugs"
 	
 	sourceCompatibility = JavaVersion.VERSION_1_8
 	
@@ -14,7 +15,7 @@ subprojects {
 		repo = "Plugins"
 		branch = "releases"
 	}
-		
+	
 	group = "com.github.unafraid.plugins"
 	version = "1.0.0"
 	
@@ -27,7 +28,19 @@ subprojects {
 			natures("org.springsource.ide.eclipse.gradle.core.nature")
 		}
 	}
-
+	
+	findbugs {
+		findbugsTest.enabled=false
+	}
+	
+	tasks.withType(FindBugs) {
+		reports {
+			xml.enabled false
+			html.enabled true
+		}
+		excludeFilter = file("$rootProject.projectDir/excludeFilter.xml")
+	}
+	
 	tasks.eclipse.doLast {
 		copy {
 			from("../eclipse-settings")
