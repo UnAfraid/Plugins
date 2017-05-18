@@ -5,6 +5,8 @@ subprojects {
 	apply plugin: "eclipse"
 	apply plugin: "java"
 	apply plugin: "maven-publish"
+	apply plugin: "maven"
+	apply plugin: "signing"
 	apply plugin: "com.github.unafraid.gradle.git-repo-plugin"
 	apply plugin: "findbugs"
 	
@@ -75,8 +77,94 @@ subprojects {
 			}
 		}
 	}
+	
+	tasks.withType(Javadoc) {
+		options.addStringOption('Xdoclint:none', '-quiet')
+	}
+	
+	task javadocJar(type: Jar) {
+		classifier = 'javadoc'
+		from javadoc
+	}
+	
+	task sourcesJar(type: Jar) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+	}
+	
+	tasks.withType(Javadoc) {
+		options.addStringOption('Xdoclint:none', '-quiet')
+	}
+	
+	artifacts {
+		archives javadocJar, sourcesJar
+	}
+	
+	signing {
+		required { gradle.taskGraph.hasTask("uploadArchives") }
+		sign configurations.archives
+	}
+	
+	uploadArchives {
+		repositories {
+			mavenDeployer {
+				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+	
+				repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+					authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+				}
+	
+				snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+					authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+				}
+	
+				pom.project {
+					name project.name
+					packaging 'jar'
+					description 'Generic Plugins API'
+					url 'https://github.com/UnAfraid/Plugins'
+	
+					scm {
+						connection 'scm:git:git@github.com:UnAfraid/Plugins.git'
+						developerConnection 'scm:git:git@github.com:UnAfraid/Plugins.git'
+						url 'git@github.com:UnAfraid/Plugins.git'
+					}
+	
+					licenses {
+						license {
+							name 'GPLv3 License'
+							url 'https://opensource.org/licenses/GPL-3.0'
+							distribution 'repo'
+						}
+					}
+	
+					developers {
+						developer {
+							id 'UnAfraid'
+							name 'Rumen Nikiforov'
+							email 'unafraid89@gmail.com'
+							organization 'L2JUnity'
+							organizationUrl 'https://l2junity.org'
+							roles {
+								role 'architect'
+								role 'developer'
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 task wrapper(type: Wrapper) {
 	gradleVersion = "3.5"
+}
+
+def getRepositoryUsername() {
+	return hasProperty('ossrhUsername') ? ossrhUsername : ""
+}
+
+def getRepositoryPassword() {
+	return hasProperty('ossrhPassword') ? ossrhPassword : ""
 }
