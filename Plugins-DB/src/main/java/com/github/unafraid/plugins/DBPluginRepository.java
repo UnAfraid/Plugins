@@ -104,7 +104,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 		
 		//@formatter:off
 		return getAvailablePlugins()
-			.filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> dbPlugin.getName().equalsIgnoreCase(plugin.getName())));
+			.filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> dbPlugin.getName().equalsIgnoreCase(plugin.getName()) && (dbPlugin.getVersion() == plugin.getVersion())));
 		//@formatter:on
 	}
 	
