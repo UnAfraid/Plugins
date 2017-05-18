@@ -21,6 +21,7 @@ package com.github.unafraid.plugins.installers.file;
 import java.util.StringJoiner;
 
 /**
+ * A simple holder class that represents a plugin file.
  * @author UnAfraid
  */
 public class PluginFile
@@ -28,17 +29,30 @@ public class PluginFile
 	private final String _source;
 	private final String _destination;
 	
+	/**
+	 * Constructs the plugin file.
+	 * @param source where installer should look for the original file
+	 * @param destination where installer shall put the file
+	 */
 	public PluginFile(String source, String destination)
 	{
 		_source = source;
 		_destination = destination;
 	}
 	
+	/**
+	 * Gets name of the original file.
+	 * @return source file
+	 */
 	public String getSource()
 	{
 		return _source;
 	}
 	
+	/**
+	 * Gets the name of the destination file.
+	 * @return destination file
+	 */
 	public String getDestination()
 	{
 		return _destination;
