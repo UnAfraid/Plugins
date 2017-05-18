@@ -96,6 +96,10 @@ public class PluginRepository<T extends AbstractPlugin>
 		{
 			LOGGER.info("Discovered {} -> {} plugin(s).", previousSize, _plugins.size());
 		}
+		else if (_plugins.size() != 0)
+		{
+			LOGGER.info("Reloaded {} plugin(s).", _plugins.size());
+		}
 	}
 	
 	/**
@@ -108,7 +112,35 @@ public class PluginRepository<T extends AbstractPlugin>
 		final Map<Integer, T> plugins = _plugins.computeIfAbsent(plugin.getName(), key -> new HashMap<>());
 		if (!plugins.containsKey(plugin.getVersion()))
 		{
-			plugins.put(plugin.getVersion(), plugin);
+			final T oldPlugin = plugins.put(plugin.getVersion(), plugin);
+			if (oldPlugin != null)
+			{
+				// After re-scan plugin might be changed, so stop first.
+				if (oldPlugin.getState() == PluginState.STARTED)
+				{
+					try
+					{
+						oldPlugin.stop();
+					}
+					catch (PluginException e)
+					{
+						LOGGER.warn("Failed to stop old plugin {}", plugin.getName(), e);
+					}
+					
+					// start again
+					if (oldPlugin.getVersion() == plugin.getVersion())
+					{
+						try
+						{
+							plugin.start();
+						}
+						catch (PluginException e)
+						{
+							LOGGER.warn("Failed to start new plugin {}", plugin.getName(), e);
+						}
+					}
+				}
+			}
 			_classLoaders.put(plugin, classLoader);
 		}
 	}
