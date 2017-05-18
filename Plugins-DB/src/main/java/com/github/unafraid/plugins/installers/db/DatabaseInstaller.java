@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
@@ -85,6 +86,8 @@ public class DatabaseInstaller implements IPluginInstaller
 	@Override
 	public void install(AbstractPlugin plugin) throws PluginException
 	{
+		Objects.requireNonNull(plugin);
+		
 		try (Connection con = DatabaseProvider.DATABASE_FACTORY.getConnection();
 			Statement st = con.createStatement())
 		{
@@ -152,6 +155,8 @@ public class DatabaseInstaller implements IPluginInstaller
 	@Override
 	public void uninstall(AbstractPlugin plugin) throws PluginException
 	{
+		Objects.requireNonNull(plugin);
+		
 		try (Connection con = DatabaseProvider.DATABASE_FACTORY.getConnection();
 			Statement st = con.createStatement())
 		{
@@ -223,6 +228,9 @@ public class DatabaseInstaller implements IPluginInstaller
 	 */
 	private void executeResource(String source, Statement st) throws Exception
 	{
+		Objects.requireNonNull(source);
+		Objects.requireNonNull(st);
+		
 		try (InputStream inputStream = getClass().getResourceAsStream(source);
 			InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 			Scanner scn = new Scanner(reader))

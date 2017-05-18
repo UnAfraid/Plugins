@@ -18,6 +18,8 @@
  */
 package com.github.unafraid.plugins;
 
+import java.util.Objects;
+
 import com.github.unafraid.plugins.conditions.PluginConditions;
 import com.github.unafraid.plugins.installers.db.DatabaseInstaller;
 import com.github.unafraid.plugins.installers.file.FileInstaller;
@@ -38,6 +40,9 @@ public abstract class AbstractDBPlugin extends AbstractPlugin
 	@Override
 	protected final void setup(FileInstaller fileInstaller, PluginMigrations migrations, PluginConditions pluginConditions)
 	{
+		Objects.requireNonNull(fileInstaller);
+		Objects.requireNonNull(migrations);
+		Objects.requireNonNull(pluginConditions);
 		setup(fileInstaller, _databaseInstaller, migrations, pluginConditions);
 	}
 	

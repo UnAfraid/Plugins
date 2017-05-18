@@ -87,6 +87,8 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	 */
 	public T getInstalledPlugin(String name)
 	{
+		Objects.requireNonNull(name);
+		
 		//@formatter:off
 		return getInstalledPlugins()
 			.filter(plugin -> name.equalsIgnoreCase(plugin.getName()))

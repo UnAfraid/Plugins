@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
@@ -53,6 +54,8 @@ public class PluginRepository<T extends AbstractPlugin>
 	 */
 	public final void scan(Class<T> pluginClass)
 	{
+		Objects.requireNonNull(pluginClass);
+		
 		// Scan for plug-ins deployed as 'jar' files
 		final int previousSize = _plugins.size();
 		try
@@ -109,6 +112,9 @@ public class PluginRepository<T extends AbstractPlugin>
 	 */
 	private void processPlugin(T plugin, ClassLoader classLoader)
 	{
+		Objects.requireNonNull(plugin);
+		Objects.requireNonNull(classLoader);
+		
 		final Map<Integer, T> plugins = _plugins.computeIfAbsent(plugin.getName(), key -> new HashMap<>());
 		if (!plugins.containsKey(plugin.getVersion()))
 		{
@@ -200,6 +206,8 @@ public class PluginRepository<T extends AbstractPlugin>
 	 */
 	public T getAvailablePlugin(String name)
 	{
+		Objects.requireNonNull(name);
+		
 		//@formatter:off
 		return getAvailablePlugins()
 			.filter(plugin -> name.equalsIgnoreCase(plugin.getName()))
@@ -227,6 +235,7 @@ public class PluginRepository<T extends AbstractPlugin>
 	 */
 	public final ClassLoader getClassLoader(T plugin)
 	{
+		Objects.requireNonNull(plugin);
 		return _classLoaders.get(plugin);
 	}
 }

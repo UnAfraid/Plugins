@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.unafraid.plugins.conditions.ConditionType;
@@ -125,6 +126,9 @@ public abstract class AbstractPlugin
 	 */
 	protected final boolean setState(PluginState currentState, PluginState newState)
 	{
+		Objects.requireNonNull(currentState);
+		Objects.requireNonNull(newState);
+		
 		if (_state.compareAndSet(currentState, newState))
 		{
 			onStateChanged(currentState, newState);
@@ -250,6 +254,10 @@ public abstract class AbstractPlugin
 	 */
 	private void verifyStateAndRun(ThrowableRunnable run, PluginState expectedState, PluginState newState) throws PluginException
 	{
+		Objects.requireNonNull(run);
+		Objects.requireNonNull(expectedState);
+		Objects.requireNonNull(newState);
+		
 		final PluginState currentState = getState();
 		if (expectedState == currentState)
 		{
