@@ -31,6 +31,7 @@ import com.github.unafraid.plugins.db.dao.dto.Plugin;
 import com.github.unafraid.plugins.db.dao.mapper.PluginMapper;
 
 /**
+ * The plugin DAO. Stores DB queries.
  * @author UnAfraid
  */
 @RegisterMapper(PluginMapper.class)

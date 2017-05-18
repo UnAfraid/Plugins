@@ -82,6 +82,12 @@ public abstract class AbstractPlugin
 	 */
 	public abstract int getVersion();
 	
+	/**
+	 * Triggered whenever the plugin is being initialized.
+	 * @param fileInstaller the file installer
+	 * @param migrations the relevant plugin migrations
+	 * @param pluginConditions plugin conditions
+	 */
 	protected abstract void setup(FileInstaller fileInstaller, PluginMigrations migrations, PluginConditions pluginConditions);
 	
 	/**

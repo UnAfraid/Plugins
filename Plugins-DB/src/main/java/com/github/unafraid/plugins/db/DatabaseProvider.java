@@ -23,6 +23,7 @@ import org.skife.jdbi.v2.DBI;
 import com.github.unafraid.plugins.util.ClassPathUtil;
 
 /**
+ * A class used to let the plugin API know what kind of Database Factory you use.
  * @author UnAfraid
  */
 public class DatabaseProvider
@@ -53,6 +54,6 @@ public class DatabaseProvider
 	
 	private DatabaseProvider()
 	{
-	   // Hide constructor.
+		// Hide constructor.
 	}
 }

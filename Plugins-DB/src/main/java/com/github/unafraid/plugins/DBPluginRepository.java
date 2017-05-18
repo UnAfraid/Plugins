@@ -24,17 +24,16 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.unafraid.plugins.AbstractPlugin;
-import com.github.unafraid.plugins.PluginRepository;
-import com.github.unafraid.plugins.PluginState;
 import com.github.unafraid.plugins.db.DatabaseProvider;
 import com.github.unafraid.plugins.db.dao.PluginsDAO;
 import com.github.unafraid.plugins.db.dao.dto.Plugin;
 import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
+ * The database supporting version of {@link PluginRepository}.<br>
+ * This way you will be able to store the installed plugins in the database, and also load them from it.
  * @author UnAfraid
- * @param <T>
+ * @param <T> refers to your own {@link AbstractDBPlugin} implementation abstract class, or you can use the original also
  */
 public class DBPluginRepository<T extends AbstractPlugin> extends PluginRepository<T>
 {
@@ -42,6 +41,9 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	
 	private static final PluginsDAO PLUGINS_DAO = DatabaseProvider.DBI.open(PluginsDAO.class);
 	
+	/**
+	 * Starts all installed plugins.
+	 */
 	@Override
 	public void startAll()
 	{
@@ -61,6 +63,9 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 		});
 	}
 	
+	/**
+	 * Stops all running plugins.
+	 */
 	@Override
 	public void stopAll()
 	{
@@ -77,6 +82,11 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 		});
 	}
 	
+	/**
+	 * Gets an installed plugin by its name.
+	 * @param name the plugin's name
+	 * @return the installed plugin
+	 */
 	public T getInstalledPlugin(String name)
 	{
 		//@formatter:off
@@ -86,6 +96,10 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 		//@formatter:on
 	}
 	
+	/**
+	 * Gets a {@link Stream} view of the installed plugins.
+	 * @return installed plugins
+	 */
 	public Stream<T> getInstalledPlugins()
 	{
 		final List<Plugin> installedPlugins = PLUGINS_DAO.findAll();
