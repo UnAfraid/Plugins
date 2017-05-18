@@ -20,6 +20,7 @@ package com.github.unafraid.plugins.db;
 
 import org.skife.jdbi.v2.DBI;
 
+import com.github.unafraid.plugins.db.dao.PluginsDAO;
 import com.github.unafraid.plugins.util.ClassPathUtil;
 
 /**
@@ -30,6 +31,7 @@ public class DatabaseProvider
 {
 	public static final IDatabaseFactory DATABASE_FACTORY;
 	public static final DBI DBI;
+	public static final PluginsDAO PLUGINS_DAO;
 	
 	static
 	{
@@ -45,6 +47,15 @@ public class DatabaseProvider
 		try
 		{
 			DBI = new DBI(DATABASE_FACTORY.getDataSource());
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		
+		try
+		{
+			PLUGINS_DAO = DBI.open(PluginsDAO.class);
 		}
 		catch (Exception e)
 		{

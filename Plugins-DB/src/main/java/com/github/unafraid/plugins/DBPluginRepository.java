@@ -19,13 +19,13 @@
 package com.github.unafraid.plugins;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.unafraid.plugins.db.DatabaseProvider;
-import com.github.unafraid.plugins.db.dao.PluginsDAO;
 import com.github.unafraid.plugins.db.dao.dto.Plugin;
 import com.github.unafraid.plugins.exceptions.PluginException;
 
@@ -38,8 +38,6 @@ import com.github.unafraid.plugins.exceptions.PluginException;
 public class DBPluginRepository<T extends AbstractPlugin> extends PluginRepository<T>
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBPluginRepository.class);
-	
-	private static final PluginsDAO PLUGINS_DAO = DatabaseProvider.DBI.open(PluginsDAO.class);
 	
 	/**
 	 * Starts all installed plugins.
@@ -102,11 +100,51 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	 */
 	public Stream<T> getInstalledPlugins()
 	{
-		final List<Plugin> installedPlugins = PLUGINS_DAO.findAll();
+		final List<Plugin> installedPlugins = DatabaseProvider.PLUGINS_DAO.findAll();
 		
 		//@formatter:off
 		return getAvailablePlugins()
 			.filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> dbPlugin.getName().equalsIgnoreCase(plugin.getName())));
 		//@formatter:on
+	}
+	
+	/**
+	 * Installs the plugin and stores it into the database.
+	 * @param plugin
+	 * @throws PluginException
+	 */
+	public void installPlugin(AbstractDBPlugin plugin) throws PluginException
+	{
+		Objects.requireNonNull(plugin);
+		
+		final Plugin dbPlugin = DatabaseProvider.PLUGINS_DAO.findByName(plugin.getName());
+		if (dbPlugin != null)
+		{
+			throw new PluginException("Plugin is already installed!");
+		}
+		
+		plugin.install();
+		
+		DatabaseProvider.PLUGINS_DAO.insert(plugin.getName(), plugin.getVersion());
+	}
+	
+	/**
+	 * Uninstalls the plugin and removes it from the database.
+	 * @param plugin
+	 * @throws PluginException
+	 */
+	public void uninstallPlugin(AbstractDBPlugin plugin) throws PluginException
+	{
+		Objects.requireNonNull(plugin);
+		
+		final Plugin dbPlugin = DatabaseProvider.PLUGINS_DAO.findByName(plugin.getName());
+		if (dbPlugin == null)
+		{
+			throw new PluginException("Plugin is not installed yet!");
+		}
+		
+		plugin.uninstall();
+		
+		DatabaseProvider.PLUGINS_DAO.delete(dbPlugin.getId());
 	}
 }
