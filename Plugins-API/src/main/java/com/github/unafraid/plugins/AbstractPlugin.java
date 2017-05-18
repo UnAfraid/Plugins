@@ -57,6 +57,23 @@ public abstract class AbstractPlugin
 	
 	protected abstract void setup(FileInstaller fileInstaller, PluginMigrations migrations, PluginConditions pluginConditions);
 	
+	/**
+	 * Triggered whenever you install your plugin.
+	 */
+	protected abstract void onInstall();
+	
+	/**
+	 * Triggered whenever you uninstall your plugin.
+	 */
+	protected abstract void onUninstall();
+	
+	/**
+	 * Triggered whenever you migrate your plugin from a version to another.
+	 * @param from previous release
+	 * @param to actual release
+	 */
+	protected abstract void onMigrate(int from, int to);
+	
 	protected abstract void onStart();
 	
 	protected abstract void onStop();
@@ -114,6 +131,8 @@ public abstract class AbstractPlugin
 			{
 				installer.install(this);
 			}
+			
+			onInstall();
 		}, PluginState.INITIALIZED, PluginState.INSTALLED);
 	}
 	
@@ -126,13 +145,20 @@ public abstract class AbstractPlugin
 			{
 				installer.uninstall(this);
 			}
+			
+			onUninstall();
 		}, PluginState.INSTALLED, PluginState.INITIALIZED);
 	}
 	
 	public final void migrate(int from, int to) throws PluginException
 	{
 		_conditions.testConditions(ConditionType.MIGRATION, this);
-		verifyStateAndRun(() -> _migrations.migrate(from, to, this), PluginState.INSTALLED, getState());
+		verifyStateAndRun(() ->
+		{
+			_migrations.migrate(from, to, this);
+			
+			onMigrate(from, to);
+		}, PluginState.INSTALLED, getState());
 	}
 	
 	private void verifyStateAndRun(ThrowableRunnable run, PluginState expectedState, PluginState newState) throws PluginException
