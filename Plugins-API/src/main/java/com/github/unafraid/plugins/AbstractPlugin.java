@@ -35,6 +35,10 @@ import com.github.unafraid.plugins.migrations.PluginMigrations;
 import com.github.unafraid.plugins.util.ThrowableRunnable;
 
 /**
+ * This class is the parent class of all plugins.<br>
+ * Contains several event hooks you may implement to your own plugin.<br>
+ * Whenever you make a new plugin, please <br>
+ * <b>do not forget to invoke {@link #init()} in the <u>constructor</u> of your plugin. Otherwise it will not work!</b>
  * @author UnAfraid
  */
 public abstract class AbstractPlugin
@@ -45,14 +49,37 @@ public abstract class AbstractPlugin
 	private final List<IPluginInstaller> _installers = new ArrayList<>(Collections.singleton(_fileInstaller));
 	private final AtomicReference<PluginState> _state = new AtomicReference<>(PluginState.AVAILABLE);
 	
+	/**
+	 * Gets the name of the plugin.<br>
+	 * People often use {@link Class#getSimpleName()} but you are allowed to use your own naming also.
+	 * @return plugin name
+	 */
 	public abstract String getName();
 	
+	/**
+	 * Gets the name of the author.<br>
+	 * Usage of {@link String#intern()} is recommend if you have multiple plugins under your name.
+	 * @return author's name
+	 */
 	public abstract String getAuthor();
 	
+	/**
+	 * Gets the creation date of this plugin.
+	 * @return creation date
+	 */
 	public abstract String getCreatedAt();
 	
+	/**
+	 * Gets the plugin's description.<br>
+	 * Feel free to provide some short details of your plugin.
+	 * @return description
+	 */
 	public abstract String getDescription();
 	
+	/**
+	 * Gets the actual version of this plugin.
+	 * @return version
+	 */
 	public abstract int getVersion();
 	
 	protected abstract void setup(FileInstaller fileInstaller, PluginMigrations migrations, PluginConditions pluginConditions);
@@ -74,10 +101,22 @@ public abstract class AbstractPlugin
 	 */
 	protected abstract void onMigrate(int from, int to);
 	
+	/**
+	 * Triggered whenever your plugin starts.
+	 */
 	protected abstract void onStart();
 	
+	/**
+	 * Triggered whenever your plugin stops.
+	 */
 	protected abstract void onStop();
 	
+	/**
+	 * Sets the state of the plugin.
+	 * @param currentState state from
+	 * @param newState state to
+	 * @return {@code true} when the state is changed, otherwise {@code false}
+	 */
 	protected final boolean setState(PluginState currentState, PluginState newState)
 	{
 		if (_state.compareAndSet(currentState, newState))
@@ -88,16 +127,29 @@ public abstract class AbstractPlugin
 		return false;
 	}
 	
+	/**
+	 * Gets the actual state of the plugin.
+	 * @return state
+	 */
 	public final PluginState getState()
 	{
 		return _state.get();
 	}
 	
+	/**
+	 * An event triggered whenever the plugin's state is changed.
+	 * @param oldState the previous state
+	 * @param newState the actual state
+	 */
 	public void onStateChanged(PluginState oldState, PluginState newState)
 	{
 		
 	}
 	
+	/**
+	 * A mandatory method that must be triggered in the constructor of your plugin.<br>
+	 * Sets up the plugin's environment related things and changed the plugin's state from available to initialized.
+	 */
 	protected final void init()
 	{
 		try
@@ -110,18 +162,30 @@ public abstract class AbstractPlugin
 		}
 	}
 	
+	/**
+	 * Starts your plugin or throws an exception.
+	 * @throws PluginException
+	 */
 	public final void start() throws PluginException
 	{
 		_conditions.testConditions(ConditionType.START, this);
 		verifyStateAndRun(this::onStart, PluginState.INSTALLED, PluginState.STARTED);
 	}
 	
+	/**
+	 * Stops your plugin or throws an exception.
+	 * @throws PluginException
+	 */
 	public final void stop() throws PluginException
 	{
 		_conditions.testConditions(ConditionType.STOP, this);
 		verifyStateAndRun(this::onStop, PluginState.STARTED, PluginState.INSTALLED);
 	}
 	
+	/**
+	 * Installs your plugin or throws an exception.
+	 * @throws PluginException
+	 */
 	public final void install() throws PluginException
 	{
 		_conditions.testConditions(ConditionType.INSTALL, this);
@@ -136,6 +200,10 @@ public abstract class AbstractPlugin
 		}, PluginState.INITIALIZED, PluginState.INSTALLED);
 	}
 	
+	/**
+	 * Uninstalls your plugin or throws an exception.
+	 * @throws PluginException
+	 */
 	public final void uninstall() throws PluginException
 	{
 		_conditions.testConditions(ConditionType.UNINSTALL, this);
@@ -150,6 +218,12 @@ public abstract class AbstractPlugin
 		}, PluginState.INSTALLED, PluginState.INITIALIZED);
 	}
 	
+	/**
+	 * Migrates your plugin from an older version to another.
+	 * @param from the older version
+	 * @param to the actual (newer) version
+	 * @throws PluginException
+	 */
 	public final void migrate(int from, int to) throws PluginException
 	{
 		_conditions.testConditions(ConditionType.MIGRATION, this);
@@ -161,6 +235,13 @@ public abstract class AbstractPlugin
 		}, PluginState.INSTALLED, getState());
 	}
 	
+	/**
+	 * Verifies the state of the plugin.
+	 * @param run a runnable wrapper triggered when set state was successful
+	 * @param expectedState the expected state (from)
+	 * @param newState the actual (newer) state (to)
+	 * @throws PluginException
+	 */
 	private void verifyStateAndRun(ThrowableRunnable run, PluginState expectedState, PluginState newState) throws PluginException
 	{
 		final PluginState currentState = getState();
@@ -177,26 +258,47 @@ public abstract class AbstractPlugin
 		throw new PluginException("Plugin proceed, expected state " + expectedState + " but found " + currentState);
 	}
 	
+	/**
+	 * Gets the plugin condition holder.
+	 * @return conditions
+	 */
 	public final PluginConditions getConditions()
 	{
 		return _conditions;
 	}
 	
+	/**
+	 * Gets the file installer.
+	 * @return file installer
+	 */
 	public final FileInstaller getFileInstaller()
 	{
 		return _fileInstaller;
 	}
 	
+	/**
+	 * Gets a list of the plugin installers that implements {@link IPluginInstaller}.
+	 * @return plugin installer list
+	 */
 	public List<IPluginInstaller> getInstallers()
 	{
 		return _installers;
 	}
 	
+	/**
+	 * Gets the plugin migrations holder.
+	 * @return migrations
+	 */
 	public final PluginMigrations getMigrations()
 	{
 		return _migrations;
 	}
 	
+	/**
+	 * Gets the absolute path of the parameter.
+	 * @param paths path parameters given by the user
+	 * @return absolute path
+	 */
 	public final Path getAbsolutePath(String... paths)
 	{
 		final String[] totalPaths = new String[paths.length + 2];
@@ -206,11 +308,21 @@ public abstract class AbstractPlugin
 		return Paths.get("config", totalPaths).normalize().toAbsolutePath();
 	}
 	
+	/**
+	 * Gets the string version of {@link #getAbsolutePath(String...)}, uses {@link Path#toString()}.
+	 * @param paths
+	 * @return absolute path
+	 */
 	public final String getAbsolutePathString(String... paths)
 	{
 		return getAbsolutePath(paths).toString();
 	}
 	
+	/**
+	 * Gets the relative path of the given parameters.
+	 * @param paths path parameters given by the user
+	 * @return relative path
+	 */
 	public final Path getRelativePath(String... paths)
 	{
 		final String[] totalPaths = new String[paths.length + 2];
@@ -220,11 +332,20 @@ public abstract class AbstractPlugin
 		return Paths.get("config", totalPaths).normalize();
 	}
 	
+	/**
+	 * Gets the string version of {@link #getRelativePath(String...)}, uses {@link Path#toString()}.
+	 * @param paths path given by the user
+	 * @return relative path
+	 */
 	public final String getRelativePathString(String... paths)
 	{
 		return getRelativePath(paths).toString();
 	}
 	
+	/**
+	 * Gets plugin's priority.
+	 * @return priority
+	 */
 	public int getPriority()
 	{
 		return 0;
