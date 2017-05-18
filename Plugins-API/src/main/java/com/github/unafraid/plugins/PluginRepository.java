@@ -35,8 +35,10 @@ import org.slf4j.LoggerFactory;
 import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
+ * This is the class that scans for available plugins.<br>
+ * You can assume that it is the plugin manager. However it is a little but more.
  * @author UnAfraid
- * @param <T>
+ * @param <T> refers to your own {@link AbstractPlugin} implementation abstract class, or you can use the original also
  */
 public class PluginRepository<T extends AbstractPlugin>
 {
@@ -44,6 +46,11 @@ public class PluginRepository<T extends AbstractPlugin>
 	private final Map<String, Map<Integer, T>> _plugins = new HashMap<>();
 	private final Map<T, ClassLoader> _classLoaders = new HashMap<>();
 	
+	/**
+	 * This method scans your classpath for the available plugins that can be initialized.<br>
+	 * If you aren't using IDE, you may drop your plugin JARs into "plugins" directory.
+	 * @param pluginClass here you shall provide the very same class you provided above as {@code T}
+	 */
 	public final void scan(Class<T> pluginClass)
 	{
 		// Scan for plug-ins deployed as 'jar' files
@@ -87,10 +94,15 @@ public class PluginRepository<T extends AbstractPlugin>
 		
 		if (previousSize != _plugins.size())
 		{
-			LOGGER.info("Discovered {} -> {} plugins", previousSize, _plugins.size());
+			LOGGER.info("Discovered {} -> {} plugin(s).", previousSize, _plugins.size());
 		}
 	}
 	
+	/**
+	 * Processes the plugin into the plugin repository.
+	 * @param plugin the plugin
+	 * @param classLoader the class loader of the plugin
+	 */
 	private void processPlugin(T plugin, ClassLoader classLoader)
 	{
 		final Map<Integer, T> plugins = _plugins.computeIfAbsent(plugin.getName(), key -> new HashMap<>());
@@ -101,11 +113,18 @@ public class PluginRepository<T extends AbstractPlugin>
 		}
 	}
 	
+	/**
+	 * Gets a {@link Map} view of all plugins.
+	 * @return all plugins
+	 */
 	public final Map<String, Map<Integer, T>> getAllPlugins()
 	{
 		return _plugins;
 	}
 	
+	/**
+	 * Starts all initialized plugins and setting them to installed.
+	 */
 	public void startAll()
 	{
 		getAvailablePlugins().forEach(plugin ->
@@ -124,6 +143,9 @@ public class PluginRepository<T extends AbstractPlugin>
 		});
 	}
 	
+	/**
+	 * Stops all plugins.
+	 */
 	public void stopAll()
 	{
 		getAvailablePlugins().forEach(plugin ->
@@ -139,6 +161,11 @@ public class PluginRepository<T extends AbstractPlugin>
 		});
 	}
 	
+	/**
+	 * Gets an available plugin by its name.
+	 * @param name the plugin's name
+	 * @return available plugin
+	 */
 	public T getAvailablePlugin(String name)
 	{
 		//@formatter:off
@@ -148,6 +175,10 @@ public class PluginRepository<T extends AbstractPlugin>
 		//@formatter:on
 	}
 	
+	/**
+	 * Gets a {@link Stream} view of available plugins.
+	 * @return available plugins
+	 */
 	public final Stream<T> getAvailablePlugins()
 	{
 		//@formatter:off
@@ -157,6 +188,11 @@ public class PluginRepository<T extends AbstractPlugin>
 		//@formatter:on
 	}
 	
+	/**
+	 * Gets a class loader by the plugin.
+	 * @param plugin the plugin
+	 * @return class loader
+	 */
 	public final ClassLoader getClassLoader(T plugin)
 	{
 		return _classLoaders.get(plugin);
