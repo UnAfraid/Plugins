@@ -1,22 +1,11 @@
-plugins {
-	id "com.github.unafraid.gradle.git-repo-plugin" version "2.0.3"
-}
 subprojects {
 	apply plugin: "eclipse"
 	apply plugin: "java"
-	apply plugin: "maven-publish"
 	apply plugin: "maven"
 	apply plugin: "signing"
-	apply plugin: "com.github.unafraid.gradle.git-repo-plugin"
 	apply plugin: "findbugs"
 	
 	sourceCompatibility = JavaVersion.VERSION_1_8
-	
-	gitPublishConfig {
-		org = "UnAfraid"
-		repo = "Plugins"
-		branch = "releases"
-	}
 	
 	group = "com.github.unafraid.plugins"
 	version = "1.0.0"
@@ -32,7 +21,7 @@ subprojects {
 	}
 	
 	findbugs {
-		findbugsTest.enabled=false
+		findbugsTest.enabled = false
 	}
 	
 	tasks.withType(FindBugs) {
@@ -57,43 +46,23 @@ subprojects {
 	tasks.withType(JavaCompile) {
 		options.encoding = "UTF-8"
 	}
-	
-	task sourceJar(type: Jar) {
-		classifier "sources"
-		from sourceSets.main.allJava
-	}
-	 
-	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				from components.java
-	
-				artifact sourceJar
-			}
-		}
-		repositories {
-			maven {
-				url "file://${gitPublishConfig.home}/${gitPublishConfig.org}/${gitPublishConfig.repo}/releases"
-			}
-		}
-	}
-	
+
 	tasks.withType(Javadoc) {
-		options.addStringOption('Xdoclint:none', '-quiet')
+		options.addStringOption("Xdoclint:none", "-quiet")
 	}
 	
 	task javadocJar(type: Jar) {
-		classifier = 'javadoc'
+		classifier = "javadoc"
 		from javadoc
 	}
 	
 	task sourcesJar(type: Jar) {
-		classifier = 'sources'
+		classifier = "sources"
 		from sourceSets.main.allSource
 	}
 	
 	tasks.withType(Javadoc) {
-		options.addStringOption('Xdoclint:none', '-quiet')
+		options.addStringOption("Xdoclint:none", "-quiet")
 	}
 	
 	artifacts {
@@ -120,34 +89,34 @@ subprojects {
 	
 				pom.project {
 					name project.name
-					packaging 'jar'
-					description 'Generic Plugins API'
-					url 'https://github.com/UnAfraid/Plugins'
+					packaging "jar"
+					description "Generic Plugins API"
+					url "https://github.com/UnAfraid/Plugins"
 	
 					scm {
-						connection 'scm:git:git@github.com:UnAfraid/Plugins.git'
-						developerConnection 'scm:git:git@github.com:UnAfraid/Plugins.git'
-						url 'git@github.com:UnAfraid/Plugins.git'
+						connection "scm:git:git@github.com:UnAfraid/Plugins.git"
+						developerConnection "scm:git:git@github.com:UnAfraid/Plugins.git"
+						url "git@github.com:UnAfraid/Plugins.git"
 					}
 	
 					licenses {
 						license {
-							name 'GPLv3 License'
-							url 'https://opensource.org/licenses/GPL-3.0'
-							distribution 'repo'
+							name "MIT License"
+							url "https://opensource.org/licenses/MIT"
+							distribution "repo"
 						}
 					}
 	
 					developers {
 						developer {
-							id 'UnAfraid'
-							name 'Rumen Nikiforov'
-							email 'unafraid89@gmail.com'
-							organization 'L2JUnity'
-							organizationUrl 'https://l2junity.org'
+							id "UnAfraid"
+							name "Rumen Nikiforov"
+							email "unafraid89@gmail.com"
+							organization "L2JUnity"
+							organizationUrl "https://l2junity.org"
 							roles {
-								role 'architect'
-								role 'developer'
+								role "architect"
+								role "developer"
 							}
 						}
 					}
@@ -162,9 +131,9 @@ task wrapper(type: Wrapper) {
 }
 
 def getRepositoryUsername() {
-	return hasProperty('ossrhUsername') ? ossrhUsername : ""
+	return hasProperty("ossrhUsername") ? ossrhUsername : ""
 }
 
 def getRepositoryPassword() {
-	return hasProperty('ossrhPassword') ? ossrhPassword : ""
+	return hasProperty("ossrhPassword") ? ossrhPassword : ""
 }
