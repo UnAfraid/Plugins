@@ -19,17 +19,26 @@
 package com.github.unafraid.plugins.exceptions;
 
 /**
+ * A runtime exception version of {@link PluginException}.
  * @author UnAfraid
  */
 public class PluginRuntimeException extends RuntimeException
 {
 	private static final long serialVersionUID = 3021042924909977223L;
 	
+	/**
+	 * Constructs the exception thrown by a failed plugin event.
+	 * @param cause the reason of the failure
+	 */
 	public PluginRuntimeException(String cause)
 	{
 		super(cause);
 	}
 	
+	/**
+	 * Constructs the exception thrown by a failed plugin event.
+	 * @param t throwable reason of the failure
+	 */
 	public PluginRuntimeException(Throwable t)
 	{
 		super(t);
