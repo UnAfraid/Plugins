@@ -286,7 +286,7 @@ public abstract class AbstractPlugin
 	}
 	
 	/**
-	 * Gets the plugin migrations holder.
+	 * Gets the plugin migrations storage.
 	 * @return migrations
 	 */
 	public final PluginMigrations getMigrations()
