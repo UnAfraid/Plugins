@@ -40,7 +40,7 @@ import com.github.unafraid.plugins.exceptions.PluginException;
 import com.github.unafraid.plugins.installers.IPluginInstaller;
 
 /**
- * File Installer implementation.
+ * A simple file installer that handles types of {@link PluginFile} holder class.
  * @author UnAfraid
  */
 public class FileInstaller implements IPluginInstaller
@@ -50,21 +50,39 @@ public class FileInstaller implements IPluginInstaller
 	private final Set<PluginFile> _files = new HashSet<>();
 	private final Set<PluginFile> _directories = new HashSet<>();
 	
+	/**
+	 * Registers a file into this installer.
+	 * @param source where installer should look for the original file
+	 * @param destination where installer shall put the file
+	 */
 	public void addFile(String source, String destination)
 	{
 		_files.add(new PluginFile(source, destination));
 	}
 	
+	/**
+	 * Registers a folder into this installer.
+	 * @param source where installer should look for the original folder
+	 * @param destination where installer shall put the folder
+	 */
 	public void addFolder(String source, String destination)
 	{
 		_directories.add(new PluginFile(source, destination));
 	}
 	
+	/**
+	 * Gets the registered files inside this installer.
+	 * @return files
+	 */
 	public Set<PluginFile> getFiles()
 	{
 		return _files;
 	}
 	
+	/**
+	 * Gets the registered directories inside this installer.
+	 * @return directories
+	 */
 	public Set<PluginFile> getDirectories()
 	{
 		return _directories;
@@ -124,6 +142,12 @@ public class FileInstaller implements IPluginInstaller
 		}
 	}
 	
+	/**
+	 * Installs the content of source directory into the destination.
+	 * @param source where installer should look for the original folder
+	 * @param destination where installer shall put the folder
+	 * @throws IOException
+	 */
 	private static void installDirectory(final Path source, final Path destination) throws IOException
 	{
 		LOGGER.debug("installResources: {} -> {}", source, destination.toAbsolutePath());
@@ -158,6 +182,11 @@ public class FileInstaller implements IPluginInstaller
 		});
 	}
 	
+	/**
+	 * Installs the source file into the destination.
+	 * @param source where installer should look for the original file
+	 * @param destination where installer shall put the file
+	 */
 	private static void installResources(final Path source, final Path destination)
 	{
 		LOGGER.debug("installResources: {} -> {}", source, destination.toAbsolutePath());

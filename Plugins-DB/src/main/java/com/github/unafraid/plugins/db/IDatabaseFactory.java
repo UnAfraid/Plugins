@@ -23,13 +23,25 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 /**
+ * A general database factory cross interface.
  * @author UnAfraid
  */
 public interface IDatabaseFactory
 {
+	/**
+	 * Gets the connection implementation of your database factory.
+	 * @return connection
+	 */
 	Connection getConnection();
 	
+	/**
+	 * Gets the data source implementation of your database factory.
+	 * @return data source
+	 */
 	DataSource getDataSource();
 	
+	/**
+	 * Shutdowns your database factory.
+	 */
 	void shutdown();
 }

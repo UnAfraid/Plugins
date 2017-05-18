@@ -19,6 +19,7 @@
 package com.github.unafraid.plugins.conditions;
 
 /**
+ * THe possible condition types listed below.
  * @author UnAfraid
  */
 public enum ConditionType

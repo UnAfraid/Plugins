@@ -27,6 +27,7 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 import com.github.unafraid.plugins.db.dao.dto.Plugin;
 
 /**
+ * The plugin mapper class, that creates a result set mapper of the plugin.
  * @author UnAfraid
  */
 public class PluginMapper implements ResultSetMapper<Plugin>

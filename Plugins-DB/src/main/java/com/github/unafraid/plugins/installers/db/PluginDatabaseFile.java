@@ -21,6 +21,7 @@ package com.github.unafraid.plugins.installers.db;
 import java.util.Optional;
 
 /**
+ * A simple holder class that stores a database file of the plugin.
  * @author UnAfraid
  */
 public class PluginDatabaseFile
@@ -29,6 +30,12 @@ public class PluginDatabaseFile
 	private final Optional<String> _name;
 	private final Optional<String> _database;
 	
+	/**
+	 * Constructs the database file of the plugin.
+	 * @param source the SQL file the installer should seek for
+	 * @param name the name of the table
+	 * @param database the name of the database
+	 */
 	public PluginDatabaseFile(String source, Optional<String> name, Optional<String> database)
 	{
 		_source = source;
@@ -36,16 +43,28 @@ public class PluginDatabaseFile
 		_database = database;
 	}
 	
+	/**
+	 * Gets the name of the source SQL file.
+	 * @return source file name
+	 */
 	public String getSource()
 	{
 		return _source;
 	}
 	
+	/**
+	 * Gets the name of the table.
+	 * @return table name
+	 */
 	public Optional<String> getName()
 	{
 		return _name;
 	}
 	
+	/**
+	 * Gets the name of the database.
+	 * @return database name.
+	 */
 	public Optional<String> getDatabase()
 	{
 		return _database;

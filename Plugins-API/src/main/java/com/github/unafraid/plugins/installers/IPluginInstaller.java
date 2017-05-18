@@ -22,11 +22,22 @@ import com.github.unafraid.plugins.AbstractPlugin;
 import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
+ * A simple interface to provide a possibility to register several types of custom installers.
  * @author UnAfraid
  */
 public interface IPluginInstaller
 {
+	/**
+	 * Triggered whenever the plugin is being installed.
+	 * @param plugin the plugin
+	 * @throws PluginException
+	 */
 	public void install(AbstractPlugin plugin) throws PluginException;
 	
+	/**
+	 * Triggered whenever the plugin is being uninstalled.
+	 * @param plugin the plugin
+	 * @throws PluginException
+	 */
 	public void uninstall(AbstractPlugin plugin) throws PluginException;
 }

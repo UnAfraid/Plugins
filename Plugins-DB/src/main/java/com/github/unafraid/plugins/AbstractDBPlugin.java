@@ -24,6 +24,8 @@ import com.github.unafraid.plugins.installers.file.FileInstaller;
 import com.github.unafraid.plugins.migrations.PluginMigrations;
 
 /**
+ * Database supporting version of {@link AbstractPlugin}.
+ * @see AbstractPlugin
  * @author UnAfraid
  */
 public abstract class AbstractDBPlugin extends AbstractPlugin
@@ -39,8 +41,19 @@ public abstract class AbstractDBPlugin extends AbstractPlugin
 		setup(fileInstaller, _databaseInstaller, migrations, pluginConditions);
 	}
 	
+	/**
+	 * Triggered whenever the plugin is being initialized.
+	 * @param fileInstaller the file installer
+	 * @param dbInstaller the database installer
+	 * @param migrations the relevant plugin migrations
+	 * @param pluginConditions plugin conditions
+	 */
 	protected abstract void setup(FileInstaller fileInstaller, DatabaseInstaller dbInstaller, PluginMigrations migrations, PluginConditions pluginConditions);
 	
+	/**
+	 * Gets the database installer
+	 * @return DB Installer
+	 */
 	public final DatabaseInstaller getDatabaseInstaller()
 	{
 		return _databaseInstaller;

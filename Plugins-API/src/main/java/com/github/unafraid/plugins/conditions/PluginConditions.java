@@ -28,22 +28,39 @@ import com.github.unafraid.plugins.AbstractPlugin;
 import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
+ * Stores the conditions.
  * @author UnAfraid
  */
 public class PluginConditions
 {
 	private final Map<ConditionType, Set<IPluginCondition>> _conditions = new EnumMap<>(ConditionType.class);
 	
+	/**
+	 * Registers a condition into this storage class if it isn't there already.
+	 * @param type type of the condition
+	 * @param condition the condition itself
+	 */
 	public void addCondition(ConditionType type, IPluginCondition condition)
 	{
 		_conditions.computeIfAbsent(type, key -> new HashSet<>()).add(condition);
 	}
 	
+	/**
+	 * Gets condition by the type it is registered.
+	 * @param type the type given by the user
+	 * @return conditions
+	 */
 	public Set<IPluginCondition> getConditions(ConditionType type)
 	{
 		return _conditions.getOrDefault(type, Collections.emptySet());
 	}
 	
+	/**
+	 * Fires conditions by type on the plugin.
+	 * @param type the given type
+	 * @param plugin the plugin
+	 * @throws PluginException
+	 */
 	public void testConditions(ConditionType type, AbstractPlugin plugin) throws PluginException
 	{
 		for (IPluginCondition condition : getConditions(type))

@@ -19,17 +19,26 @@
 package com.github.unafraid.plugins.exceptions;
 
 /**
+ * An exception triggered by this plugin API whenever a plugin event is failed.
  * @author UnAfraid
  */
 public class PluginException extends Exception
 {
 	private static final long serialVersionUID = 3021042924909977223L;
 	
+	/**
+	 * Constructs the exception thrown by a failed plugin event.
+	 * @param cause the reason of the failure
+	 */
 	public PluginException(String cause)
 	{
 		super(cause);
 	}
 	
+	/**
+	 * Constructs the exception thrown by a failed plugin event.
+	 * @param t throwable reason of the failure
+	 */
 	public PluginException(Throwable t)
 	{
 		super(t);

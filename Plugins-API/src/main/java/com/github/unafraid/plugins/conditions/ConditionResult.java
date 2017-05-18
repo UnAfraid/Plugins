@@ -19,6 +19,7 @@
 package com.github.unafraid.plugins.conditions;
 
 /**
+ * The condition result class.
  * @author UnAfraid
  */
 public class ConditionResult
@@ -26,17 +27,30 @@ public class ConditionResult
 	private final boolean _isSuccess;
 	private final String _description;
 	
+	/**
+	 * Constructs a new condition result.
+	 * @param isSuccess whether condition is successful or not
+	 * @param description the description of the condition
+	 */
 	public ConditionResult(boolean isSuccess, String description)
 	{
 		_isSuccess = isSuccess;
 		_description = description;
 	}
 	
+	/**
+	 * Whether condition is successful or not.
+	 * @return {@code true} if condition is successful, otherwise {@code false}
+	 */
 	public boolean isSuccess()
 	{
 		return _isSuccess;
 	}
 	
+	/**
+	 * Describes the condition.
+	 * @return description
+	 */
 	public String describe()
 	{
 		return _description;

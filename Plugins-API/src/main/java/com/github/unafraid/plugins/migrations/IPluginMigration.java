@@ -21,13 +21,27 @@ package com.github.unafraid.plugins.migrations;
 import com.github.unafraid.plugins.AbstractPlugin;
 
 /**
+ * An interface to be used to create plugin migrations.
  * @author UnAfraid
  */
 public interface IPluginMigration
 {
+	/**
+	 * Gets the description of this migration.<br>
+	 * In short: the reason of change, what happened, etc.
+	 * @return description
+	 */
 	public String getDescription();
 	
+	/**
+	 * The target version where migrations is applicable.
+	 * @return target version
+	 */
 	public int getTargetVersion();
 	
+	/**
+	 * Triggered whenever the plugin is being migrated.
+	 * @param plugin the plugin
+	 */
 	public void migrate(AbstractPlugin plugin);
 }

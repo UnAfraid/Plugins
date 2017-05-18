@@ -26,22 +26,39 @@ import com.github.unafraid.plugins.AbstractPlugin;
 import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
+ * A class that stores a set of migrations.<br>
+ * Migration happens whenever you upgrade your plugin from an older version to a newer.
  * @author UnAfraid
  */
 public class PluginMigrations
 {
 	private final Set<IPluginMigration> _migrations = new HashSet<>();
 	
+	/**
+	 * Registers a migration into this storage class.
+	 * @param migration
+	 */
 	public void addMigration(IPluginMigration migration)
 	{
 		_migrations.add(migration);
 	}
 	
+	/**
+	 * Gets a {@link Set} view of the migrations.
+	 * @return migrations
+	 */
 	public Set<IPluginMigration> getMigrations()
 	{
 		return _migrations;
 	}
 	
+	/**
+	 * A method to start all possible applicable migrations.
+	 * @param from the older version
+	 * @param to the newer version
+	 * @param plugin the plugin
+	 * @throws PluginException
+	 */
 	public void migrate(int from, int to, AbstractPlugin plugin) throws PluginException
 	{
 		if (from >= to)

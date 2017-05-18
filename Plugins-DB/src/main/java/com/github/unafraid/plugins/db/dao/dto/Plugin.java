@@ -19,6 +19,7 @@
 package com.github.unafraid.plugins.db.dao.dto;
 
 /**
+ * A simple holder class storing plugin DB information.
  * @author UnAfraid
  */
 public class Plugin

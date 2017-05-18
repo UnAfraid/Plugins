@@ -21,11 +21,21 @@ package com.github.unafraid.plugins.conditions;
 import com.github.unafraid.plugins.AbstractPlugin;
 
 /**
+ * The interface that is used to create a condition.
  * @author UnAfraid
  */
 public interface IPluginCondition
 {
+	/**
+	 * Gets the information related to this condition.
+	 * @return information
+	 */
 	public String getInformation();
 	
+	/**
+	 * Fires the condition.
+	 * @param plugin the plugin
+	 * @return condition result
+	 */
 	public ConditionResult test(AbstractPlugin plugin);
 }
