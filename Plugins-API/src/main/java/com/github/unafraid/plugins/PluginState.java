@@ -19,12 +19,20 @@
 package com.github.unafraid.plugins;
 
 /**
+ * A simple enum that contains the possible plugin states this API/you might set.
  * @author UnAfraid
  */
 public enum PluginState
 {
+	/** The initial state of a newly scanned plugin. **/
 	AVAILABLE,
+	
+	/** Initialized state of the plugin, at this state you can assume it is loaded, but not yet installed or started. **/
 	INITIALIZED,
+	
+	/** The state when the plugin is being installed by the user. **/
 	INSTALLED,
+	
+	/** Self-explanatory name: When the plugin is running. **/
 	STARTED;
 }
