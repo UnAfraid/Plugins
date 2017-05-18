@@ -21,6 +21,7 @@ package com.github.unafraid.plugins.util;
 import com.github.unafraid.plugins.exceptions.PluginRuntimeException;
 
 /**
+ * A simple wrapper class to invoke {@link PluginRuntimeException} in case an exception is caught.
  * @author UnAfraid
  */
 public interface ThrowableRunnable extends Runnable
