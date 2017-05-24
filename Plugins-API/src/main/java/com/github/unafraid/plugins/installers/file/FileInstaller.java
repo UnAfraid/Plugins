@@ -196,11 +196,6 @@ public class FileInstaller implements IPluginInstaller
 		
 		try
 		{
-			if (!destination.toFile().isDirectory())
-			{
-				throw new IOException("Invalid destination!");
-			}
-			
 			if (!Files.exists(destination))
 			{
 				Files.createDirectories(destination);
