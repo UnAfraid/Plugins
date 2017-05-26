@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +33,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,7 +50,7 @@ import com.github.unafraid.plugins.installers.IPluginInstaller;
  */
 public class FileInstaller implements IPluginInstaller
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FileInstaller.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(FileInstaller.class);
 	
 	private final Set<PluginFile> _files = new HashSet<>();
 	private final Set<PluginFile> _directories = new HashSet<>();
@@ -151,36 +153,29 @@ public class FileInstaller implements IPluginInstaller
 	 * @param destination where installer shall put the folder
 	 * @throws IOException
 	 */
-	private static void installDirectory(final Path source, final Path destination) throws IOException
+	private static void installDirectory(Path source, Path destination) throws IOException
 	{
 		LOGGER.debug("installResources: {} -> {}", source, destination.toAbsolutePath());
 		
-		Files.walk(source).forEach(path ->
+		Files.walkFileTree(source, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
 		{
-			try
+			@Override
+			public FileVisitResult preVisitDirectory(Path sourceDirectory, BasicFileAttributes attrs) throws IOException
 			{
-				if (!Files.exists(destination))
-				{
-					Files.createDirectories(destination);
-				}
-				
-				final Path dst = destination.resolve(path.normalize());
-				if (!Files.exists(dst.getParent()))
-				{
-					Files.createDirectories(dst.getParent());
-					LOGGER.debug("Created parent: {}", dst.getParent());
-				}
-				else
-				{
-					LOGGER.debug("Directory already exists: {}", dst.getParent());
-				}
-				LOGGER.debug("Copying file: {} -> {}", source, dst);
-				Files.copy(Files.newInputStream(source), dst, StandardCopyOption.REPLACE_EXISTING);
-				LOGGER.debug("Copied: {}", dst);
+				final Path destinationDirectory = destination.resolve(source.relativize(sourceDirectory));
+				Files.createDirectories(destinationDirectory);
+				LOGGER.debug("Created directories: {}", destinationDirectory);
+				return FileVisitResult.CONTINUE;
 			}
-			catch (Exception e)
+			
+			@Override
+			public FileVisitResult visitFile(Path sourceFile, BasicFileAttributes attrs) throws IOException
 			{
-				LOGGER.warn("", e);
+				final Path destinationFile = destination.resolve(source.relativize(sourceFile));
+				LOGGER.debug("Copying file: {} -> {}", sourceFile, destinationFile);
+				Files.copy(sourceFile, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+				LOGGER.debug("Copied: {}", destinationFile);
+				return FileVisitResult.CONTINUE;
 			}
 		});
 	}
