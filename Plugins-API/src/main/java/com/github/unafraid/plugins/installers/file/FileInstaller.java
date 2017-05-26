@@ -213,19 +213,21 @@ public class FileInstaller implements IPluginInstaller
 		{
 			for (PluginFile file : _files)
 			{
-				final Path destFile = Paths.get(file.getDestination());
+				final Path destFile = plugin.getRelativePath(file.getDestination());
 				Files.deleteIfExists(destFile);
+				LOGGER.debug("Deleted file: {}", destFile);
 			}
 			
 			for (PluginFile dir : _directories)
 			{
-				final Path destFile = Paths.get(dir.getDestination());
-				Files.walkFileTree(destFile, new SimpleFileVisitor<Path>()
+				final Path destFile = plugin.getRelativePath(dir.getDestination());
+				Files.walkFileTree(destFile, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
 				{
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
 					{
 						Files.deleteIfExists(file);
+						LOGGER.debug("Deleted file: {}", file);
 						return FileVisitResult.CONTINUE;
 					}
 					
@@ -237,6 +239,7 @@ public class FileInstaller implements IPluginInstaller
 							throw exc;
 						}
 						Files.deleteIfExists(dir);
+						LOGGER.debug("Deleted directory: {}", dir);
 						return FileVisitResult.CONTINUE;
 					}
 				});
