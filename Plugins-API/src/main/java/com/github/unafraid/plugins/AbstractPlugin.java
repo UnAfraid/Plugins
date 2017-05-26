@@ -312,17 +312,26 @@ public abstract class AbstractPlugin
 	}
 	
 	/**
+	 * Normalises the path of the plugin.
+	 * @param paths path parameters given by the user
+	 * @return normalised path
+	 */
+	private Path getNormalizedPath(String... paths)
+	{
+		final String[] totalPaths = new String[paths.length + 1];
+		totalPaths[0] = getName();
+		System.arraycopy(paths, 0, totalPaths, 1, paths.length);
+		return Paths.get("plugins", totalPaths).normalize();
+	}
+	
+	/**
 	 * Gets the absolute path of the parameter.
 	 * @param paths path parameters given by the user
 	 * @return absolute path
 	 */
 	public final Path getAbsolutePath(String... paths)
 	{
-		final String[] totalPaths = new String[paths.length + 2];
-		totalPaths[0] = "plugins";
-		totalPaths[1] = getName();
-		System.arraycopy(paths, 0, totalPaths, 2, paths.length);
-		return Paths.get("config", totalPaths).normalize().toAbsolutePath();
+		return getNormalizedPath(paths).toAbsolutePath();
 	}
 	
 	/**
@@ -342,11 +351,7 @@ public abstract class AbstractPlugin
 	 */
 	public final Path getRelativePath(String... paths)
 	{
-		final String[] totalPaths = new String[paths.length + 2];
-		totalPaths[0] = "plugins";
-		totalPaths[1] = getName();
-		System.arraycopy(paths, 0, totalPaths, 2, paths.length);
-		return Paths.get("config", totalPaths).normalize();
+		return getNormalizedPath(paths);
 	}
 	
 	/**
