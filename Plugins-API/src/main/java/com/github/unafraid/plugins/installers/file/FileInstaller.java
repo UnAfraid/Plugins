@@ -234,16 +234,34 @@ public class FileInstaller implements IPluginInstaller
 					@Override
 					public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
 					{
-						if (exc != null)
-						{
-							throw exc;
-						}
 						Files.deleteIfExists(dir);
 						LOGGER.debug("Deleted directory: {}", dir);
 						return FileVisitResult.CONTINUE;
 					}
 				});
 			}
+			
+			final Path pluginRoot = plugin.getRelativePath(".");
+			Files.walkFileTree(pluginRoot, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
+			{
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+				{
+					throw new InternalError("A file was found in " + plugin.getName() + "'s directory! That shouldn't happen.");
+				}
+				
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
+				{
+					// Cleanup unnecessary parent directories created by single-file installations.
+					Files.deleteIfExists(dir);
+					LOGGER.debug("Deleted directory: {}", dir);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+			
+			// Finally delete the empty plugin's root directory also.
+			Files.deleteIfExists(pluginRoot);
 		}
 		catch (Exception e)
 		{
