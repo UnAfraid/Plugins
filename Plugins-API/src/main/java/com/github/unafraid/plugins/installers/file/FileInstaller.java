@@ -242,26 +242,29 @@ public class FileInstaller implements IPluginInstaller
 			}
 			
 			final Path pluginRoot = plugin.getRelativePath(".");
-			Files.walkFileTree(pluginRoot, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
+			if (Files.exists(pluginRoot))
 			{
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+				Files.walkFileTree(pluginRoot, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
 				{
-					throw new InternalError("A file was found in " + plugin.getName() + "'s directory! That shouldn't happen.");
-				}
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+					{
+						throw new InternalError("A file was found in " + plugin.getName() + "'s directory! That shouldn't happen.");
+					}
+					
+					@Override
+					public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
+					{
+						// Cleanup unnecessary parent directories created by single-file installations.
+						Files.deleteIfExists(dir);
+						LOGGER.debug("Deleted directory: {}", dir);
+						return FileVisitResult.CONTINUE;
+					}
+				});
 				
-				@Override
-				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
-				{
-					// Cleanup unnecessary parent directories created by single-file installations.
-					Files.deleteIfExists(dir);
-					LOGGER.debug("Deleted directory: {}", dir);
-					return FileVisitResult.CONTINUE;
-				}
-			});
-			
-			// Finally delete the empty plugin's root directory also.
-			Files.deleteIfExists(pluginRoot);
+				// Finally delete the empty plugin's root directory also.
+				Files.deleteIfExists(pluginRoot);
+			}
 		}
 		catch (Exception e)
 		{
