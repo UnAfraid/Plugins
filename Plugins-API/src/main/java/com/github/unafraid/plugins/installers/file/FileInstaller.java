@@ -260,13 +260,14 @@ public class FileInstaller implements IPluginInstaller
 					{
 						// Cleanup unnecessary parent directories created by single-file installations.
 						Files.deleteIfExists(dir);
-						LOGGER.debug("Deleted directory: {}", dir);
+						LOGGER.debug("Deleted remaining directory: {}", dir);
 						return FileVisitResult.CONTINUE;
 					}
 				});
 				
 				// Finally delete the empty plugin's root directory also.
 				Files.deleteIfExists(pluginRoot);
+				LOGGER.debug("Deleted plugin root: {}", pluginRoot);
 			}
 		}
 		catch (Exception e)
