@@ -247,9 +247,12 @@ public class FileInstaller implements IPluginInstaller
 				Files.walkFileTree(pluginRoot, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
 				{
 					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
 					{
-						throw new InternalError("A file was found in " + plugin.getName() + "'s directory! That shouldn't happen.");
+						// Files might be there either as config properties, or left by the user.
+						Files.deleteIfExists(file);
+						LOGGER.debug("Deleted remaining file: {}", file);
+						return FileVisitResult.CONTINUE;
 					}
 					
 					@Override
