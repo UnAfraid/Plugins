@@ -1,14 +1,27 @@
+plugins {
+	id "com.github.unafraid.gradle.git-repo-plugin" version "2.0.4"
+}
+
 subprojects {
+	apply plugin: "com.github.unafraid.gradle.git-repo-plugin"
 	apply plugin: "eclipse"
 	apply plugin: "java"
 	apply plugin: "maven"
+	apply plugin: "maven-publish"
 	apply plugin: "signing"
 	apply plugin: "findbugs"
 	
 	sourceCompatibility = JavaVersion.VERSION_1_8
 	
+	gitPublishConfig {
+		org = "UnAfraid"
+		repo = "Plugins"
+		branch = "releases"
+	}
+	
+	
 	group = "com.github.unafraid.plugins"
-	version = "1.0.1"
+	version = "1.0.2"
 	
 	repositories {
 		mavenCentral()
@@ -72,6 +85,21 @@ subprojects {
 	signing {
 		required { gradle.taskGraph.hasTask("uploadArchives") }
 		sign configurations.archives
+	}
+	
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+	
+				artifact sourcesJar
+			}
+		}
+		repositories {
+			maven {
+				url "file://${gitPublishConfig.home}/${gitPublishConfig.org}/${gitPublishConfig.repo}/releases"
+			}
+		}
 	}
 	
 	uploadArchives {
