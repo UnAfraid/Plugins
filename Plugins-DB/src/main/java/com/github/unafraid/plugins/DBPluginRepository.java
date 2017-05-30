@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.unafraid.plugins.db.DatabaseProvider;
+import com.github.unafraid.plugins.db.dao.PluginsDAO;
 import com.github.unafraid.plugins.db.dao.dto.Plugin;
 import com.github.unafraid.plugins.exceptions.PluginException;
 
@@ -105,12 +106,15 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	 */
 	public Stream<T> getInstalledPlugins()
 	{
-		final List<Plugin> installedPlugins = DatabaseProvider.PLUGINS_DAO.findAll();
-		
-		//@formatter:off
-		return getAvailablePlugins()
-			.filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> dbPlugin.getName().equalsIgnoreCase(plugin.getName()) && (dbPlugin.getVersion() == plugin.getVersion())));
-		//@formatter:on
+		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
+		{
+			final List<Plugin> installedPlugins = pluginsDao.findAll();
+			
+			//@formatter:off
+			return getAvailablePlugins()
+				.filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> dbPlugin.getName().equalsIgnoreCase(plugin.getName()) && (dbPlugin.getVersion() == plugin.getVersion())));
+			//@formatter:on	
+		}
 	}
 	
 	/**
@@ -122,15 +126,18 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	{
 		Objects.requireNonNull(plugin);
 		
-		final Plugin dbPlugin = DatabaseProvider.PLUGINS_DAO.findByName(plugin.getName());
-		if (dbPlugin != null)
+		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
 		{
-			throw new PluginException("Plugin is already installed!");
+			final Plugin dbPlugin = pluginsDao.findByName(plugin.getName());
+			if (dbPlugin != null)
+			{
+				throw new PluginException("Plugin is already installed!");
+			}
+			
+			plugin.install();
+			
+			pluginsDao.insert(plugin.getName(), plugin.getVersion());
 		}
-		
-		plugin.install();
-		
-		DatabaseProvider.PLUGINS_DAO.insert(plugin.getName(), plugin.getVersion());
 	}
 	
 	/**
@@ -142,14 +149,17 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	{
 		Objects.requireNonNull(plugin);
 		
-		final Plugin dbPlugin = DatabaseProvider.PLUGINS_DAO.findByName(plugin.getName());
-		if (dbPlugin == null)
+		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
 		{
-			throw new PluginException("Plugin is not installed yet!");
+			final Plugin dbPlugin = pluginsDao.findByName(plugin.getName());
+			if (dbPlugin == null)
+			{
+				throw new PluginException("Plugin is not installed yet!");
+			}
+			
+			plugin.uninstall();
+			
+			pluginsDao.delete(dbPlugin.getId());
 		}
-		
-		plugin.uninstall();
-		
-		DatabaseProvider.PLUGINS_DAO.delete(dbPlugin.getId());
 	}
 }
