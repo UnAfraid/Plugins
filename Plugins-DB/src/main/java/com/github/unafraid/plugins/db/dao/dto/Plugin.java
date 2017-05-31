@@ -30,17 +30,20 @@ public class Plugin
 	private final int id;
 	private String name;
 	private int version;
+	private long installedOn;
 	
 	/**
 	 * @param id
 	 * @param name
 	 * @param version
+	 * @param installedOn
 	 */
-	public Plugin(int id, String name, int version)
+	public Plugin(int id, String name, int version, long installedOn)
 	{
 		this.id = id;
 		this.name = name;
 		this.version = version;
+		this.installedOn = installedOn;
 	}
 	
 	/**
@@ -81,5 +84,21 @@ public class Plugin
 	public void setVersion(int version)
 	{
 		this.version = version;
+	}
+	
+	/**
+	 * @return the installedOn
+	 */
+	public long getInstalledOn()
+	{
+		return installedOn;
+	}
+	
+	/**
+	 * @param installedOn the installedOn to set
+	 */
+	public void setInstalledOn(long installedOn)
+	{
+		this.installedOn = installedOn;
 	}
 }

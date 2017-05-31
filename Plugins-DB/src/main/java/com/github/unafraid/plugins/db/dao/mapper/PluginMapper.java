@@ -38,6 +38,6 @@ public class PluginMapper implements ResultSetMapper<Plugin>
 	@Override
 	public Plugin map(int index, ResultSet r, StatementContext ctx) throws SQLException
 	{
-		return new Plugin(r.getInt("id"), r.getString("name"), r.getInt("version"));
+		return new Plugin(r.getInt("id"), r.getString("name"), r.getInt("version"), r.getLong("installedOn"));
 	}
 }

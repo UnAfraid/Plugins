@@ -136,7 +136,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 			
 			plugin.install();
 			
-			pluginsDao.insert(plugin.getName(), plugin.getVersion());
+			pluginsDao.insert(plugin.getName(), plugin.getVersion(), System.currentTimeMillis());
 		}
 	}
 	
