@@ -21,6 +21,8 @@
  */
 package com.github.unafraid.plugins.db.dao.dto;
 
+import java.util.Date;
+
 /**
  * A simple holder class storing plugin DB information.
  * @author UnAfraid
@@ -100,5 +102,18 @@ public class Plugin
 	public void setInstalledOn(long installedOn)
 	{
 		this.installedOn = installedOn;
+	}
+	
+	@Override
+	public String toString()
+	{
+		final StringBuilder sb = new StringBuilder();
+		sb.append("ID: ").append(getId()).append(", ");
+		sb.append("Name: ").append(getName()).append(", ");
+		sb.append("Version: ").append(getVersion()).append(", ");
+		sb.append("installedOn: ").append(new Date(getInstalledOn())).append(", ");
+		// Soon ...
+		// sb.append("state: ").append(PluginState.values()[getState()]);
+		return sb.toString();
 	}
 }
