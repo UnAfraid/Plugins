@@ -122,6 +122,11 @@ public abstract class AbstractPlugin
 	protected abstract void onStop();
 	
 	/**
+	 * Triggered whenever you reload the plugin.
+	 */
+	protected abstract void onReload();
+	
+	/**
 	 * Sets the state of the plugin.
 	 * @param currentState state from
 	 * @param newState state to
@@ -193,6 +198,16 @@ public abstract class AbstractPlugin
 	{
 		_conditions.testConditions(ConditionType.STOP, this);
 		verifyStateAndRun(this::onStop, PluginState.STARTED, PluginState.INSTALLED);
+	}
+	
+	/**
+	 * Reloads your plugin or throws an exception.
+	 * @throws PluginException
+	 */
+	public final void reload() throws PluginException
+	{
+		_conditions.testConditions(ConditionType.RELOAD, this);
+		onReload();
 	}
 	
 	/**

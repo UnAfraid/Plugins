@@ -31,5 +31,6 @@ public enum ConditionType
 	UNINSTALL,
 	MIGRATION,
 	START,
-	STOP
+	STOP,
+	RELOAD
 }
