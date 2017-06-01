@@ -40,9 +40,12 @@ import com.github.unafraid.plugins.db.dao.mapper.PluginMapper;
 @RegisterMapper(PluginMapper.class)
 public interface PluginsDAO extends Closeable
 {
-	@SqlUpdate("INSERT INTO `plugins`(`name`, `version`, `installedOn`) VALUES (:name, :version, :installedOn)")
+	@SqlUpdate("INSERT INTO `plugins`(`name`, `version`, `installedOn`, `state`) VALUES (:name, :version, :installedOn, :state)")
 	@GetGeneratedKeys
-	int insert(@Bind("name") String name, @Bind("version") int version, @Bind("installedOn") long installedOn);
+	int insert(@Bind("name") String name, @Bind("version") int version, @Bind("installedOn") long installedOn, @Bind("state") int state);
+	
+	@SqlUpdate("UPDATE `plugins` SET `state` = :state WHERE `name` = :name")
+	void updateStateByName(@Bind("state") int state, @Bind("name") String name);
 	
 	@SqlUpdate("DELETE FROM `plugins` WHERE `id` = :id")
 	void delete(@Bind("id") int id);

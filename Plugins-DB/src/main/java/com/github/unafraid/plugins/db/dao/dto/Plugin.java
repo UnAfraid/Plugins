@@ -23,6 +23,8 @@ package com.github.unafraid.plugins.db.dao.dto;
 
 import java.util.Date;
 
+import com.github.unafraid.plugins.PluginState;
+
 /**
  * A simple holder class storing plugin DB information.
  * @author UnAfraid
@@ -33,19 +35,22 @@ public class Plugin
 	private String name;
 	private int version;
 	private long installedOn;
+	private int state;
 	
 	/**
 	 * @param id
 	 * @param name
 	 * @param version
 	 * @param installedOn
+	 * @param state
 	 */
-	public Plugin(int id, String name, int version, long installedOn)
+	public Plugin(int id, String name, int version, long installedOn, int state)
 	{
 		this.id = id;
 		this.name = name;
 		this.version = version;
 		this.installedOn = installedOn;
+		this.state = state;
 	}
 	
 	/**
@@ -104,6 +109,22 @@ public class Plugin
 		this.installedOn = installedOn;
 	}
 	
+	/**
+	 * @return the state
+	 */
+	public int getState()
+	{
+		return state;
+	}
+	
+	/**
+	 * @param state the state to set
+	 */
+	public void setState(int state)
+	{
+		this.state = state;
+	}
+	
 	@Override
 	public String toString()
 	{
@@ -112,8 +133,7 @@ public class Plugin
 		sb.append("Name: ").append(getName()).append(", ");
 		sb.append("Version: ").append(getVersion()).append(", ");
 		sb.append("installedOn: ").append(new Date(getInstalledOn())).append(", ");
-		// Soon ...
-		// sb.append("state: ").append(PluginState.values()[getState()]);
+		sb.append("state: ").append(PluginState.values()[getState()]);
 		return sb.toString();
 	}
 }

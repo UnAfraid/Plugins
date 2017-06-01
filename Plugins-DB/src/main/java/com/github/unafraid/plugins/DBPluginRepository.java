@@ -44,6 +44,38 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBPluginRepository.class);
 	
 	/**
+	 * An event triggered whenever the application is booting.<br>
+	 * This is designed explicitly to start previously [before application shutdown] started plugin(s) only.
+	 */
+	public void onApplicationBoot()
+	{
+		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
+		{
+			final List<Plugin> installedPlugins = pluginsDao.findAll();
+			
+			//@formatter:off
+			getAvailablePlugins().filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> 
+				dbPlugin.getName().equalsIgnoreCase(plugin.getName()) 
+				&& ((dbPlugin.getVersion() == plugin.getVersion()) 
+				&& (dbPlugin.getState() == PluginState.STARTED.ordinal()))))
+				.forEach(plugin -> {
+					try
+					{
+						if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
+						{
+							plugin.start();
+						}
+					}
+					catch (PluginException e)
+					{
+						LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
+					}
+				});
+			//@formatter:on
+		}
+	}
+	
+	/**
 	 * Starts all installed plugins.
 	 */
 	@Override
@@ -136,7 +168,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 			
 			plugin.install();
 			
-			pluginsDao.insert(plugin.getName(), plugin.getVersion(), System.currentTimeMillis());
+			pluginsDao.insert(plugin.getName(), plugin.getVersion(), System.currentTimeMillis(), plugin.getState().ordinal());
 		}
 	}
 	
