@@ -44,7 +44,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBPluginRepository.class);
 	
 	/**
-	 * First sets all plugin's state to installed (to avoid already installed plugin exception),<br>
+	 * First sets all DB installed plugin's state to installed (to avoid already installed plugin exception),<br>
 	 * then starts all plugins which are marked by autoStart {@code true} in DB.
 	 */
 	@Override
