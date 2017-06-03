@@ -71,7 +71,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 						}
 						catch (PluginException e)
 						{
-							LOGGER.warn("Failed to start plugin " + plugin.getName(), e);
+							LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
 						}
 					}
 				}
@@ -93,7 +93,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 			}
 			catch (PluginException e)
 			{
-				LOGGER.warn("Failed to stop plugin " + plugin.getName(), e);
+				LOGGER.warn("Failed to stop plugin {}", plugin.getName(), e);
 			}
 		});
 	}
