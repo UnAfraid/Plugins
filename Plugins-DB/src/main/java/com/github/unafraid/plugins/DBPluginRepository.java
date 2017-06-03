@@ -181,13 +181,20 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	 * Update plugin's auto start state.
 	 * @param plugin the plugin itself
 	 * @param autoStart if {@code true}, the plugin will start on application boot, if {@code false} the plugin won't
+	 * @throws PluginException
 	 */
-	public void updateAutoStart(AbstractDBPlugin plugin, boolean autoStart)
+	public void updateAutoStart(AbstractDBPlugin plugin, boolean autoStart) throws PluginException
 	{
 		Objects.requireNonNull(plugin);
 		
 		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
 		{
+			final Plugin dbPlugin = pluginsDao.findByName(plugin.getName());
+			if (dbPlugin == null)
+			{
+				throw new PluginException("Plugin is not installed yet!");
+			}
+			
 			pluginsDao.updateAutoStartByName(autoStart ? 1 : 0, plugin.getName());
 		}
 	}
