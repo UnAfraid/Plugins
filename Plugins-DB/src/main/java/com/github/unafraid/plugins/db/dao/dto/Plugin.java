@@ -21,6 +21,8 @@
  */
 package com.github.unafraid.plugins.db.dao.dto;
 
+import java.util.Date;
+
 /**
  * A simple holder class storing plugin DB information.
  * @author UnAfraid
@@ -28,19 +30,25 @@ package com.github.unafraid.plugins.db.dao.dto;
 public class Plugin
 {
 	private final int id;
-	private String name;
-	private int version;
+	private final String name;
+	private final int version;
+	private final long installedOn;
+	private final int autoStart;
 	
 	/**
 	 * @param id
 	 * @param name
 	 * @param version
+	 * @param installedOn
+	 * @param autoStart
 	 */
-	public Plugin(int id, String name, int version)
+	public Plugin(int id, String name, int version, long installedOn, int autoStart)
 	{
 		this.id = id;
 		this.name = name;
 		this.version = version;
+		this.installedOn = installedOn;
+		this.autoStart = autoStart;
 	}
 	
 	/**
@@ -60,14 +68,6 @@ public class Plugin
 	}
 	
 	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-	
-	/**
 	 * @return the version
 	 */
 	public int getVersion()
@@ -76,10 +76,30 @@ public class Plugin
 	}
 	
 	/**
-	 * @param version the version to set
+	 * @return the installedOn
 	 */
-	public void setVersion(int version)
+	public long getInstalledOn()
 	{
-		this.version = version;
+		return installedOn;
+	}
+	
+	/**
+	 * @return the autoStart
+	 */
+	public boolean isAutoStart()
+	{
+		return autoStart == 1;
+	}
+	
+	@Override
+	public String toString()
+	{
+		final StringBuilder sb = new StringBuilder();
+		sb.append("ID: ").append(getId()).append(", ");
+		sb.append("Name: ").append(getName()).append(", ");
+		sb.append("Version: ").append(getVersion()).append(", ");
+		sb.append("installedOn: ").append(new Date(getInstalledOn())).append(", ");
+		sb.append("autoStart: ").append(isAutoStart());
+		return sb.toString();
 	}
 }

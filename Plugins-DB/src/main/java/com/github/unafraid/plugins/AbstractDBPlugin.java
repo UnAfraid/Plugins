@@ -46,6 +46,7 @@ public abstract class AbstractDBPlugin extends AbstractPlugin
 		Objects.requireNonNull(fileInstaller);
 		Objects.requireNonNull(migrations);
 		Objects.requireNonNull(pluginConditions);
+		
 		setup(fileInstaller, _databaseInstaller, migrations, pluginConditions);
 	}
 	
