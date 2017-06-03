@@ -30,10 +30,10 @@ import java.util.Date;
 public class Plugin
 {
 	private final int id;
-	private String name;
-	private int version;
-	private long installedOn;
-	private int autoStart;
+	private final String name;
+	private final int version;
+	private final long installedOn;
+	private final int autoStart;
 	
 	/**
 	 * @param id
@@ -68,27 +68,11 @@ public class Plugin
 	}
 	
 	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-	
-	/**
 	 * @return the version
 	 */
 	public int getVersion()
 	{
 		return version;
-	}
-	
-	/**
-	 * @param version the version to set
-	 */
-	public void setVersion(int version)
-	{
-		this.version = version;
 	}
 	
 	/**
@@ -100,27 +84,11 @@ public class Plugin
 	}
 	
 	/**
-	 * @param installedOn the installedOn to set
-	 */
-	public void setInstalledOn(long installedOn)
-	{
-		this.installedOn = installedOn;
-	}
-	
-	/**
 	 * @return the autoStart
 	 */
 	public boolean isAutoStart()
 	{
 		return autoStart == 1;
-	}
-	
-	/**
-	 * @param autoStart the autoStart to set
-	 */
-	public void setAutoStart(int autoStart)
-	{
-		this.autoStart = autoStart;
 	}
 	
 	@Override
