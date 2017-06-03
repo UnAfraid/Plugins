@@ -52,7 +52,13 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	{
 		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
 		{
-			getInstalledPlugins().forEach(plugin ->
+			final List<Plugin> installedPlugins = pluginsDao.findAll();
+			
+			//@formatter:off
+			getAvailablePlugins().filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> 
+				dbPlugin.getName().equalsIgnoreCase(plugin.getName())
+				&& (dbPlugin.getVersion() == plugin.getVersion()))).forEach(plugin ->
+			//@formatter:on
 			{
 				if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
 				{
