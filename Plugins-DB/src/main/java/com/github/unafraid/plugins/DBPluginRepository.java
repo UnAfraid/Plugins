@@ -50,11 +50,11 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	@Override
 	public void startAll()
 	{
-		getInstalledPlugins().forEach(plugin ->
+		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
 		{
-			if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
+			getInstalledPlugins().forEach(plugin ->
 			{
-				try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
+				if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
 				{
 					final Plugin dbPlugin = pluginsDao.findByName(plugin.getName());
 					if ((dbPlugin != null) && dbPlugin.isAutoStart())
@@ -69,8 +69,8 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 	
 	/**
