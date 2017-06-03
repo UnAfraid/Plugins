@@ -97,35 +97,51 @@ public abstract class AbstractPlugin
 	/**
 	 * Triggered whenever you install your plugin.
 	 */
-	protected abstract void onInstall();
+	protected void onInstall()
+	{
+		// to be overridden
+	}
 	
 	/**
 	 * Triggered whenever you uninstall your plugin.
 	 */
-	protected abstract void onUninstall();
+	protected void onUninstall()
+	{
+		// to be overridden
+	}
 	
 	/**
 	 * Triggered whenever you migrate your plugin from a version to another.
 	 * @param from previous release
 	 * @param to actual release
 	 */
-	protected abstract void onMigrate(int from, int to);
+	protected void onMigrate(int from, int to)
+	{
+		// to be overridden
+	}
 	
 	/**
 	 * Triggered whenever your plugin starts.
 	 */
-	protected abstract void onStart();
+	protected void onStart()
+	{
+		// to be overridden
+	}
 	
 	/**
 	 * Triggered whenever your plugin stops.
 	 */
-	protected abstract void onStop();
+	protected void onStop()
+	{
+		// to be overridden
+	}
 	
 	/**
 	 * Triggered whenever you reload the plugin.
 	 */
 	protected void onReload()
 	{
+		// to be overridden
 	}
 	
 	/**
@@ -163,7 +179,7 @@ public abstract class AbstractPlugin
 	 */
 	public void onStateChanged(PluginState oldState, PluginState newState)
 	{
-		
+		// to be overridden
 	}
 	
 	/**
