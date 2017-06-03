@@ -44,7 +44,8 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBPluginRepository.class);
 	
 	/**
-	 * Starts all installed plugins.
+	 * First sets all plugin's state to installed (to avoid already installed plugin exception),<br>
+	 * then starts all plugins which are marked by autoStart {@code true} in DB.
 	 */
 	@Override
 	public void startAll()
@@ -126,7 +127,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	
 	/**
 	 * Installs the plugin and stores it into the database.
-	 * @param plugin
+	 * @param plugin the plugin itself
 	 * @throws PluginException
 	 */
 	public void installPlugin(AbstractDBPlugin plugin) throws PluginException
@@ -149,7 +150,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	
 	/**
 	 * Uninstalls the plugin and removes it from the database.
-	 * @param plugin
+	 * @param plugin the plugin itself
 	 * @throws PluginException
 	 */
 	public void uninstallPlugin(AbstractDBPlugin plugin) throws PluginException
@@ -167,6 +168,21 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 			plugin.uninstall();
 			
 			pluginsDao.delete(dbPlugin.getId());
+		}
+	}
+	
+	/**
+	 * Update plugin's auto start state.
+	 * @param plugin the plugin itself
+	 * @param autoStart if {@code true}, the plugin will start on application boot, if {@code false} the plugin won't
+	 */
+	public void updateAutoStart(AbstractDBPlugin plugin, boolean autoStart)
+	{
+		Objects.requireNonNull(plugin);
+		
+		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
+		{
+			pluginsDao.updateAutoStartByName(autoStart ? 1 : 0, plugin.getName());
 		}
 	}
 }
