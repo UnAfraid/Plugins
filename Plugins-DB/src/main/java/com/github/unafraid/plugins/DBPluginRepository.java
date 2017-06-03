@@ -44,38 +44,6 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBPluginRepository.class);
 	
 	/**
-	 * An event triggered whenever the application is booting.<br>
-	 * This is designed explicitly to start previously [before application shutdown] started plugin(s) only.
-	 */
-	public void onApplicationBoot()
-	{
-		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
-		{
-			final List<Plugin> installedPlugins = pluginsDao.findAll();
-			
-			//@formatter:off
-			getAvailablePlugins().filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> 
-				dbPlugin.getName().equalsIgnoreCase(plugin.getName()) 
-				&& ((dbPlugin.getVersion() == plugin.getVersion()) 
-				&& (dbPlugin.isAutoStart()))))
-				.forEach(plugin -> {
-					try
-					{
-						if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
-						{
-							plugin.start();
-						}
-					}
-					catch (PluginException e)
-					{
-						LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
-					}
-				});
-			//@formatter:on
-		}
-	}
-	
-	/**
 	 * Starts all installed plugins.
 	 */
 	@Override
@@ -83,16 +51,23 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	{
 		getInstalledPlugins().forEach(plugin ->
 		{
-			try
+			if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
 			{
-				if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
+				try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
 				{
-					plugin.start();
+					final Plugin dbPlugin = pluginsDao.findByName(plugin.getName());
+					if ((dbPlugin != null) && dbPlugin.isAutoStart())
+					{
+						try
+						{
+							plugin.start();
+						}
+						catch (PluginException e)
+						{
+							LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
+						}
+					}
 				}
-			}
-			catch (PluginException e)
-			{
-				LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
 			}
 		});
 	}
@@ -103,7 +78,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 	@Override
 	public void stopAll()
 	{
-		getInstalledPlugins().forEach(plugin ->
+		getInstalledPlugins().filter(plugin -> plugin.getState() == PluginState.STARTED).forEach(plugin ->
 		{
 			try
 			{
