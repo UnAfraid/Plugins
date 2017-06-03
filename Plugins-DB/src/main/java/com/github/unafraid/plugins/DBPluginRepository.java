@@ -57,7 +57,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 			getAvailablePlugins().filter(plugin -> installedPlugins.stream().anyMatch(dbPlugin -> 
 				dbPlugin.getName().equalsIgnoreCase(plugin.getName()) 
 				&& ((dbPlugin.getVersion() == plugin.getVersion()) 
-				&& (dbPlugin.getState() == PluginState.STARTED.ordinal()))))
+				&& (dbPlugin.isAutoStart()))))
 				.forEach(plugin -> {
 					try
 					{
@@ -168,7 +168,7 @@ public class DBPluginRepository<T extends AbstractPlugin> extends PluginReposito
 			
 			plugin.install();
 			
-			pluginsDao.insert(plugin.getName(), plugin.getVersion(), System.currentTimeMillis(), plugin.getState().ordinal());
+			pluginsDao.insert(plugin.getName(), plugin.getVersion(), System.currentTimeMillis(), 0);
 		}
 	}
 	

@@ -50,7 +50,7 @@ public abstract class AbstractDBPlugin extends AbstractPlugin
 		
 		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
 		{
-			pluginsDao.updateStateByName(newState.ordinal(), getName());
+			pluginsDao.updateAutoStartByName(newState == PluginState.STARTED ? 1 : 0, getName());
 		}
 	}
 	

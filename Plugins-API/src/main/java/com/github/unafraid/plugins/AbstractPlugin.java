@@ -124,7 +124,9 @@ public abstract class AbstractPlugin
 	/**
 	 * Triggered whenever you reload the plugin.
 	 */
-	protected abstract void onReload();
+	protected void onReload()
+	{
+	}
 	
 	/**
 	 * Sets the state of the plugin.

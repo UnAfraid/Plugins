@@ -23,8 +23,6 @@ package com.github.unafraid.plugins.db.dao.dto;
 
 import java.util.Date;
 
-import com.github.unafraid.plugins.PluginState;
-
 /**
  * A simple holder class storing plugin DB information.
  * @author UnAfraid
@@ -35,22 +33,22 @@ public class Plugin
 	private String name;
 	private int version;
 	private long installedOn;
-	private int state;
+	private int autoStart;
 	
 	/**
 	 * @param id
 	 * @param name
 	 * @param version
 	 * @param installedOn
-	 * @param state
+	 * @param autoStart
 	 */
-	public Plugin(int id, String name, int version, long installedOn, int state)
+	public Plugin(int id, String name, int version, long installedOn, int autoStart)
 	{
 		this.id = id;
 		this.name = name;
 		this.version = version;
 		this.installedOn = installedOn;
-		this.state = state;
+		this.autoStart = autoStart;
 	}
 	
 	/**
@@ -110,19 +108,19 @@ public class Plugin
 	}
 	
 	/**
-	 * @return the state
+	 * @return the autoStart
 	 */
-	public int getState()
+	public boolean isAutoStart()
 	{
-		return state;
+		return autoStart == 1;
 	}
 	
 	/**
-	 * @param state the state to set
+	 * @param autoStart the autoStart to set
 	 */
-	public void setState(int state)
+	public void setAutoStart(int autoStart)
 	{
-		this.state = state;
+		this.autoStart = autoStart;
 	}
 	
 	@Override
@@ -133,7 +131,7 @@ public class Plugin
 		sb.append("Name: ").append(getName()).append(", ");
 		sb.append("Version: ").append(getVersion()).append(", ");
 		sb.append("installedOn: ").append(new Date(getInstalledOn())).append(", ");
-		sb.append("state: ").append(PluginState.values()[getState()]);
+		sb.append("autoStart: ").append(isAutoStart());
 		return sb.toString();
 	}
 }
