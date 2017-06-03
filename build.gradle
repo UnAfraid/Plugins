@@ -19,9 +19,8 @@ subprojects {
 		branch = "releases"
 	}
 	
-	
 	group = "com.github.unafraid.plugins"
-	version = "1.0.2"
+	version = "1.0.3"
 	
 	repositories {
 		mavenCentral()
