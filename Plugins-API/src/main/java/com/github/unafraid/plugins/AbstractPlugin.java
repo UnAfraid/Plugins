@@ -25,8 +25,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.unafraid.plugins.conditions.ConditionType;
@@ -52,6 +54,7 @@ public abstract class AbstractPlugin
 	private final PluginMigrations _migrations = new PluginMigrations();
 	private final List<IPluginInstaller> _installers = new ArrayList<>(Collections.singleton(_fileInstaller));
 	private final AtomicReference<PluginState> _state = new AtomicReference<>(PluginState.AVAILABLE);
+	private final Set<IPluginFunction<? extends AbstractPlugin>> _functions = new LinkedHashSet<>();
 	
 	/**
 	 * Gets the name of the plugin.<br>
@@ -87,62 +90,34 @@ public abstract class AbstractPlugin
 	public abstract int getVersion();
 	
 	/**
+	 * Gets an instance of a function that corresponds to the function class given
+	 * @param <T>
+	 * @param <R>
+	 * @param functionClass
+	 * @return an instance of a function
+	 */
+	public final <T extends AbstractPlugin, R extends IPluginFunction<T>> R getFunction(Class<R> functionClass)
+	{
+		return _functions.stream().filter(function -> functionClass.isInstance(function)).map(functionClass::cast).findFirst().orElse(null);
+	}
+	
+	/**
+	 * Registers function of an plugin
+	 * @param <T> the generic plugin type
+	 * @param function the function of the plugin
+	 */
+	protected <T extends AbstractPlugin> void registerFunction(IPluginFunction<T> function)
+	{
+		_functions.add(function);
+	}
+	
+	/**
 	 * Triggered whenever the plugin is being initialized.
 	 * @param fileInstaller the file installer
 	 * @param migrations the relevant plugin migrations
 	 * @param pluginConditions plugin conditions
 	 */
 	protected abstract void setup(FileInstaller fileInstaller, PluginMigrations migrations, PluginConditions pluginConditions);
-	
-	/**
-	 * Triggered whenever you install your plugin.
-	 */
-	protected void onInstall()
-	{
-		// to be overridden
-	}
-	
-	/**
-	 * Triggered whenever you uninstall your plugin.
-	 */
-	protected void onUninstall()
-	{
-		// to be overridden
-	}
-	
-	/**
-	 * Triggered whenever you migrate your plugin from a version to another.
-	 * @param from previous release
-	 * @param to actual release
-	 */
-	protected void onMigrate(int from, int to)
-	{
-		// to be overridden
-	}
-	
-	/**
-	 * Triggered whenever your plugin starts.
-	 */
-	protected void onStart()
-	{
-		// to be overridden
-	}
-	
-	/**
-	 * Triggered whenever your plugin stops.
-	 */
-	protected void onStop()
-	{
-		// to be overridden
-	}
-	
-	/**
-	 * Triggered whenever you reload the plugin.
-	 */
-	protected void onReload()
-	{
-		// to be overridden
-	}
 	
 	/**
 	 * Sets the state of the plugin.
@@ -205,7 +180,13 @@ public abstract class AbstractPlugin
 	public final void start() throws PluginException
 	{
 		_conditions.testConditions(ConditionType.START, this);
-		verifyStateAndRun(this::onStart, PluginState.INSTALLED, PluginState.STARTED);
+		verifyStateAndRun(() ->
+		{
+			for (IPluginFunction<?> function : _functions)
+			{
+				function.onStart();
+			}
+		}, PluginState.INSTALLED, PluginState.STARTED);
 	}
 	
 	/**
@@ -215,7 +196,13 @@ public abstract class AbstractPlugin
 	public final void stop() throws PluginException
 	{
 		_conditions.testConditions(ConditionType.STOP, this);
-		verifyStateAndRun(this::onStop, PluginState.STARTED, PluginState.INSTALLED);
+		verifyStateAndRun(() ->
+		{
+			for (IPluginFunction<?> function : _functions)
+			{
+				function.onStop();
+			}
+		}, PluginState.STARTED, PluginState.INSTALLED);
 	}
 	
 	/**
@@ -225,7 +212,10 @@ public abstract class AbstractPlugin
 	public final void reload() throws PluginException
 	{
 		_conditions.testConditions(ConditionType.RELOAD, this);
-		onReload();
+		for (IPluginFunction<?> function : _functions)
+		{
+			function.onReload();
+		}
 	}
 	
 	/**
@@ -242,7 +232,10 @@ public abstract class AbstractPlugin
 				installer.install(this);
 			}
 			
-			onInstall();
+			for (IPluginFunction<?> function : _functions)
+			{
+				function.onInstall();
+			}
 		}, PluginState.INITIALIZED, PluginState.INSTALLED);
 	}
 	
@@ -260,7 +253,10 @@ public abstract class AbstractPlugin
 				installer.uninstall(this);
 			}
 			
-			onUninstall();
+			for (IPluginFunction<?> function : _functions)
+			{
+				function.onUninstall();
+			}
 		}, PluginState.INSTALLED, PluginState.INITIALIZED);
 	}
 	
@@ -277,7 +273,10 @@ public abstract class AbstractPlugin
 		{
 			_migrations.migrate(from, to, this);
 			
-			onMigrate(from, to);
+			for (IPluginFunction<?> function : _functions)
+			{
+				function.onMigrate(from, to);
+			}
 		}, PluginState.INSTALLED, getState());
 	}
 	
@@ -330,7 +329,7 @@ public abstract class AbstractPlugin
 	 * Gets a list of the plugin installers that implements {@link IPluginInstaller}.
 	 * @return plugin installer list
 	 */
-	public List<IPluginInstaller> getInstallers()
+	public final List<IPluginInstaller> getInstallers()
 	{
 		return _installers;
 	}
@@ -412,8 +411,9 @@ public abstract class AbstractPlugin
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((_conditions == null) ? 0 : _conditions.hashCode());
-		result = (prime * result) + ((_installers == null) ? 0 : _installers.hashCode());
 		result = (prime * result) + ((_fileInstaller == null) ? 0 : _fileInstaller.hashCode());
+		result = (prime * result) + ((_functions == null) ? 0 : _functions.hashCode());
+		result = (prime * result) + ((_installers == null) ? 0 : _installers.hashCode());
 		result = (prime * result) + ((_migrations == null) ? 0 : _migrations.hashCode());
 		result = (prime * result) + ((_state == null) ? 0 : _state.hashCode());
 		return result;
@@ -434,7 +434,7 @@ public abstract class AbstractPlugin
 		{
 			return false;
 		}
-		final AbstractPlugin other = (AbstractPlugin) obj;
+		AbstractPlugin other = (AbstractPlugin) obj;
 		if (_conditions == null)
 		{
 			if (other._conditions != null)
@@ -446,17 +446,6 @@ public abstract class AbstractPlugin
 		{
 			return false;
 		}
-		if (_installers == null)
-		{
-			if (other._installers != null)
-			{
-				return false;
-			}
-		}
-		else if (!_installers.equals(other._installers))
-		{
-			return false;
-		}
 		if (_fileInstaller == null)
 		{
 			if (other._fileInstaller != null)
@@ -465,6 +454,28 @@ public abstract class AbstractPlugin
 			}
 		}
 		else if (!_fileInstaller.equals(other._fileInstaller))
+		{
+			return false;
+		}
+		if (_functions == null)
+		{
+			if (other._functions != null)
+			{
+				return false;
+			}
+		}
+		else if (!_functions.equals(other._functions))
+		{
+			return false;
+		}
+		if (_installers == null)
+		{
+			if (other._installers != null)
+			{
+				return false;
+			}
+		}
+		else if (!_installers.equals(other._installers))
 		{
 			return false;
 		}

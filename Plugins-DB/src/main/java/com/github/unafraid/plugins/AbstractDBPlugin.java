@@ -22,8 +22,12 @@
 package com.github.unafraid.plugins;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import com.github.unafraid.plugins.conditions.PluginConditions;
+import com.github.unafraid.plugins.db.DatabaseProvider;
+import com.github.unafraid.plugins.db.dao.PluginsDAO;
+import com.github.unafraid.plugins.db.dao.dto.Plugin;
 import com.github.unafraid.plugins.installers.db.DatabaseInstaller;
 import com.github.unafraid.plugins.installers.file.FileInstaller;
 import com.github.unafraid.plugins.migrations.PluginMigrations;
@@ -66,5 +70,17 @@ public abstract class AbstractDBPlugin extends AbstractPlugin
 	public final DatabaseInstaller getDatabaseInstaller()
 	{
 		return _databaseInstaller;
+	}
+	
+	/**
+	 * Gets the plugin database entry if exists
+	 * @return The plugin database entry
+	 */
+	public Optional<Plugin> getDatabaseEntry()
+	{
+		try (PluginsDAO pluginsDao = DatabaseProvider.DBI.open(PluginsDAO.class))
+		{
+			return Optional.ofNullable(pluginsDao.findByName(getName()));
+		}
 	}
 }
