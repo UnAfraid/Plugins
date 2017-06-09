@@ -65,7 +65,7 @@ public class PluginFile
 	public String toString()
 	{
 		final StringJoiner sj = new StringJoiner(", ", getClass().getSimpleName() + "[", "]");
-		sj.add("source" + _source);
+		sj.add("source: " + _source);
 		sj.add("destination: " + _destination);
 		return sj.toString();
 	}
