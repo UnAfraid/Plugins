@@ -106,6 +106,8 @@ public class FileInstaller implements IPluginInstaller
 				LOGGER.debug("Path: {}", location);
 				if (location.getPath().endsWith(".jar"))
 				{
+					LOGGER.debug("Getting resources from JAR.");
+					
 					try (FileSystem fs = FileSystems.newFileSystem(path, Thread.currentThread().getContextClassLoader()))
 					{
 						for (PluginFile file : _directories)
@@ -125,6 +127,8 @@ public class FileInstaller implements IPluginInstaller
 				}
 				else
 				{
+					LOGGER.debug("Getting resources from ClassPath.");
+					
 					for (PluginFile file : _directories)
 					{
 						installDirectory(path.resolve(file.getSource().startsWith("/") ? file.getSource().substring(1) : file.getSource()), plugin.getRelativePath(file.getDestination()));
@@ -155,7 +159,7 @@ public class FileInstaller implements IPluginInstaller
 	 */
 	private static void installDirectory(Path source, Path destination) throws IOException
 	{
-		LOGGER.debug("installResources: {} -> {}", source, destination.toAbsolutePath());
+		LOGGER.debug("installResources: {} -> {}", source.toAbsolutePath(), destination.toAbsolutePath());
 		
 		Files.walkFileTree(source, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
 		{
@@ -173,7 +177,7 @@ public class FileInstaller implements IPluginInstaller
 			{
 				final Path destinationFile = destination.resolve(source.relativize(sourceFile));
 				LOGGER.debug("Copying file: {} -> {}", sourceFile, destinationFile);
-				Files.copy(sourceFile, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(Files.newInputStream(sourceFile), destinationFile, StandardCopyOption.REPLACE_EXISTING);
 				LOGGER.debug("Copied: {}", destinationFile);
 				return FileVisitResult.CONTINUE;
 			}
@@ -185,9 +189,9 @@ public class FileInstaller implements IPluginInstaller
 	 * @param source where installer should look for the original file
 	 * @param destination where installer shall put the file
 	 */
-	private static void installResources(final Path source, final Path destination)
+	private static void installResources(Path source, Path destination)
 	{
-		LOGGER.debug("installResources: {} -> {}", source, destination.toAbsolutePath());
+		LOGGER.debug("installResources: {} -> {}", source.toAbsolutePath(), destination.toAbsolutePath());
 		
 		try
 		{
