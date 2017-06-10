@@ -179,7 +179,7 @@ public class FileInstaller implements IPluginInstaller
 			{
 				final Path destinationFile = destination.resolve(source.relativize(sourceFile).toString());
 				LOGGER.debug("Copying file: {} -> {}", sourceFile, destinationFile);
-				Files.copy(sourceFile, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(Files.newInputStream(sourceFile), destinationFile, StandardCopyOption.REPLACE_EXISTING);
 				LOGGER.debug("Copied: {}", destinationFile);
 				return FileVisitResult.CONTINUE;
 			}
