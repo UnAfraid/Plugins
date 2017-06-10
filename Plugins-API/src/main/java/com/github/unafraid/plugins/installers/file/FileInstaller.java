@@ -163,21 +163,23 @@ public class FileInstaller implements IPluginInstaller
 		
 		Files.walkFileTree(source, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
 		{
+			private Path _currentTarget;
+			
 			@Override
-			public FileVisitResult preVisitDirectory(Path sourceDirectory, BasicFileAttributes attrs) throws IOException
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
 			{
-				final Path destinationDirectory = destination.resolve(source.relativize(sourceDirectory));
-				Files.createDirectories(destinationDirectory);
-				LOGGER.debug("Created directories: {}", destinationDirectory);
+				_currentTarget = destination.resolve(source.relativize(dir).toString());
+				Files.createDirectories(_currentTarget);
+				LOGGER.debug("Created directories: {}", _currentTarget);
 				return FileVisitResult.CONTINUE;
 			}
 			
 			@Override
 			public FileVisitResult visitFile(Path sourceFile, BasicFileAttributes attrs) throws IOException
 			{
-				final Path destinationFile = destination.resolve(source.relativize(sourceFile));
+				final Path destinationFile = destination.resolve(source.relativize(sourceFile).toString());
 				LOGGER.debug("Copying file: {} -> {}", sourceFile, destinationFile);
-				Files.copy(Files.newInputStream(sourceFile), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(sourceFile, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 				LOGGER.debug("Copied: {}", destinationFile);
 				return FileVisitResult.CONTINUE;
 			}
