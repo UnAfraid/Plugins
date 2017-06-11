@@ -125,7 +125,7 @@ public class DatabaseInstaller implements IPluginInstaller
 							if (!rs.next())
 							{
 								// Execute the resource
-								executeResource(file.getSource(), st);
+								executeResource(plugin, file.getSource(), st);
 							}
 						}
 					}
@@ -133,7 +133,7 @@ public class DatabaseInstaller implements IPluginInstaller
 				else
 				{
 					// Execute the resource
-					executeResource(file.getSource(), st);
+					executeResource(plugin, file.getSource(), st);
 				}
 				
 				if (file.getDatabase().isPresent())
@@ -194,7 +194,7 @@ public class DatabaseInstaller implements IPluginInstaller
 							if (rs.next())
 							{
 								// Execute the resource
-								executeResource(file.getSource(), st);
+								executeResource(plugin, file.getSource(), st);
 							}
 						}
 					}
@@ -202,7 +202,7 @@ public class DatabaseInstaller implements IPluginInstaller
 				else
 				{
 					// Execute the resource
-					executeResource(file.getSource(), st);
+					executeResource(plugin, file.getSource(), st);
 				}
 				if (file.getDatabase().isPresent())
 				{
@@ -224,17 +224,19 @@ public class DatabaseInstaller implements IPluginInstaller
 	}
 	
 	/**
-	 * Executes the source resource file into the statement provided
-	 * @param source
-	 * @param st
+	 * Executes the source resource file into the statement provided.
+	 * @param plugin the plugin which has the resources
+	 * @param source location of the resource inside the JAR
+	 * @param st the SQL statement used for the process
 	 * @throws Exception
 	 */
-	private void executeResource(String source, Statement st) throws Exception
+	private void executeResource(AbstractPlugin plugin, String source, Statement st) throws Exception
 	{
+		Objects.requireNonNull(plugin);
 		Objects.requireNonNull(source);
 		Objects.requireNonNull(st);
 		
-		try (InputStream inputStream = getClass().getResourceAsStream(source);
+		try (InputStream inputStream = plugin.getClass().getResourceAsStream(source);
 			InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 			Scanner scn = new Scanner(reader))
 		{
