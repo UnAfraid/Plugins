@@ -21,7 +21,18 @@
  */
 package com.github.unafraid.plugins.db;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.stream.Collectors;
+
 import org.skife.jdbi.v2.DBI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.unafraid.plugins.util.ClassPathUtil;
 
@@ -31,6 +42,8 @@ import com.github.unafraid.plugins.util.ClassPathUtil;
  */
 public class DatabaseProvider
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseProvider.class);
+	private static final String TABLE_NAME = "plugins";
 	public static final IDatabaseFactory DATABASE_FACTORY;
 	public static final DBI DBI;
 	
@@ -48,6 +61,41 @@ public class DatabaseProvider
 		try
 		{
 			DBI = new DBI(DATABASE_FACTORY.getDataSource());
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		
+		try (Connection con = DATABASE_FACTORY.getConnection();
+			ResultSet rs = con.getMetaData().getTables(null, null, TABLE_NAME, null))
+		{
+			boolean hasTable = false;
+			while (rs.next())
+			{
+				final String tableName = rs.getString("TABLE_NAME");
+				if ((tableName != null) && TABLE_NAME.equals(tableName))
+				{
+					hasTable = true;
+					break;
+				}
+			}
+			
+			if (!hasTable)
+			{
+				try (Statement st = con.createStatement();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(DatabaseProvider.class.getResourceAsStream("/sql/plugins.sql"), StandardCharsets.UTF_8)))
+				{
+					final String sql = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+					st.execute(sql);
+					LOGGER.info("Automatically installing table {}", TABLE_NAME);
+				}
+				catch (SQLException e)
+				{
+					LOGGER.warn("Failed to install table {} :", TABLE_NAME, e);
+					throw new RuntimeException(e);
+				}
+			}
 		}
 		catch (Exception e)
 		{
