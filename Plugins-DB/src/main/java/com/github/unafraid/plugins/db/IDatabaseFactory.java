@@ -43,8 +43,4 @@ public interface IDatabaseFactory
 	 */
 	DataSource getDataSource();
 	
-	/**
-	 * Shutdowns your database factory.
-	 */
-	void shutdown();
 }

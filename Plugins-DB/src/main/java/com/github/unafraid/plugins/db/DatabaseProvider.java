@@ -28,13 +28,15 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.unafraid.plugins.util.ClassPathUtil;
+import com.google.common.collect.Lists;
 
 /**
  * A class used to let the plugin API know what kind of Database Factory you use.
@@ -51,7 +53,14 @@ public class DatabaseProvider
 	{
 		try
 		{
-			DATABASE_FACTORY = ClassPathUtil.getInstanceOfExtending(IDatabaseFactory.class);
+			final ArrayList<IDatabaseFactory> availableDatabaseFactories = Lists.newArrayList(ServiceLoader.load(IDatabaseFactory.class));
+			
+			if (availableDatabaseFactories.size() != 1)
+			{
+				throw new IllegalStateException("Invalid amount of provided database factories found: " + availableDatabaseFactories);
+			}
+			
+			DATABASE_FACTORY = availableDatabaseFactories.get(0);
 		}
 		catch (Exception e)
 		{

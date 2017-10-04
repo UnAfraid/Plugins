@@ -19,40 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.github.unafraid.plugins;
+package com.github.unafraid.plugins.db;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.unafraid.plugins.installers.IPluginInstaller;
 import com.github.unafraid.plugins.util.ClassPathUtil;
 
-/**
- * @author UnAfraid
- */
-public class ClassPathTest
+public class TestDatabaseProvider
 {
 	@Test
-	public void pluginInstallerClassPath() throws Exception
+	public void testIDatabaseFactoryExistenceOnClassPath() throws IOException
 	{
-		final List<Class<? extends IPluginInstaller>> classes = 
-				ClassPathUtil.getAllClassesExtending("com.github.unafraid.plugins", IPluginInstaller.class).toList();
-		Assert.assertNotEquals(classes.size(), 0);
-	}
-	
-	@Test
-	public void testDiscovery() throws IOException
-	{
-		final List<Class<?>> classes1 = ClassPathUtil.getAllClasses("com").toList();
-		final List<Class<?>> classes2 = ClassPathUtil.getAllClasses("com.github.unafraid").toList();
-		final List<Class<?>> classes3 = ClassPathUtil.getAllClasses("com.github.unafraid.plugins.util").toList();
+		final Set<Class<? extends IDatabaseFactory>> classes = 
+				ClassPathUtil.getAllClassesExtending("com.github.unafraid", IDatabaseFactory.class).toSet();
 		
-		Assert.assertTrue(classes1.size() > classes2.size());
-		Assert.assertTrue(classes2.size() > classes3.size());
-		Assert.assertTrue(classes3.size() > 0);
+		Assert.assertEquals(Collections.singleton(IDatabaseFactory.class), classes);
 	}
 	
 }
