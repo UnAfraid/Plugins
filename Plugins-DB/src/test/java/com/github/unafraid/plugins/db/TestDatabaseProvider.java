@@ -21,51 +21,24 @@
  */
 package com.github.unafraid.plugins.db;
 
-import java.util.ArrayList;
-import java.util.ServiceLoader;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
 
-import org.skife.jdbi.v2.DBI;
+import org.junit.Assert;
+import org.junit.Test;
 
-import com.google.common.collect.Lists;
+import com.github.unafraid.plugins.util.ClassPathUtil;
 
-/**
- * A class used to let the plugin API know what kind of Database Factory you use.
- * @author UnAfraid
- */
-public class DatabaseProvider
+public class TestDatabaseProvider
 {
-	public static final IDatabaseFactory DATABASE_FACTORY;
-	public static final DBI DBI;
-	
-	static
+	@Test
+	public void testIDatabaseFactoryExistenceOnClassPath() throws IOException
 	{
-		try
-		{
-			final ArrayList<IDatabaseFactory> availableDatabaseFactories = Lists.newArrayList(ServiceLoader.load(IDatabaseFactory.class));
-			
-			if (availableDatabaseFactories.size() != 1) {
-				throw new IllegalStateException("Invalid amount of provided database factories found: " + availableDatabaseFactories);
-			}
-			
-			DATABASE_FACTORY = availableDatabaseFactories.get(0);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
+		final Set<Class<? extends IDatabaseFactory>> classes = 
+				ClassPathUtil.getAllClassesExtending("com.github.unafraid", IDatabaseFactory.class).toSet();
 		
-		try
-		{
-			DBI = new DBI(DATABASE_FACTORY.getDataSource());
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
+		Assert.assertEquals(Collections.singleton(IDatabaseFactory.class), classes);
 	}
 	
-	private DatabaseProvider()
-	{
-		// Hide constructor.
-	}
 }
