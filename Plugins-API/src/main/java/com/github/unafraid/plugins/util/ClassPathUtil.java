@@ -92,6 +92,9 @@ public final class ClassPathUtil
 	
 	/**
 	 * Same as {@link #getAllClasses(ClassLoader, String)}, using {@link ClassLoader#getSystemClassLoader()} as the classLoader parameter.
+	 * @param packagePrefix
+	 * @return
+	 * @throws IOException
 	 */
 	public static FluentIterable<Class<?>> getAllClasses(String packagePrefix) throws IOException
 	{
@@ -118,6 +121,11 @@ public final class ClassPathUtil
 	
 	/**
 	 * Same as {@link #getAllClassesExtending(ClassLoader, String, Class)}, using {@link ClassLoader#getSystemClassLoader()} as the classLoader parameter.
+	 * @param packagePrefix
+	 * @param targetClass
+	 * @param <T>
+	 * @return
+	 * @throws IOException
 	 */
 	public static <T> FluentIterable<Class<? extends T>> getAllClassesExtending(String packagePrefix, Class<T> targetClass) throws IOException
 	{
@@ -126,7 +134,6 @@ public final class ClassPathUtil
 	
 	/**
 	 * Gets all classes extending the given target class.
-	 * @param <T>
 	 * @param classLoader the class loader that is used for the process
 	 * @param packagePrefix the package where you seek
 	 * @param annotationClass the given annotation class
@@ -143,6 +150,10 @@ public final class ClassPathUtil
 	
 	/**
 	 * Same as {@link #getAllClassesAnnotatedWith(ClassLoader, String, Class)}, using {@link ClassLoader#getSystemClassLoader()} as the classLoader parameter.
+	 * @param packagePrefix
+	 * @param annotationClass
+	 * @return
+	 * @throws IOException
 	 */
 	public static FluentIterable<Class<?>> getAllClassesAnnotatedWith(String packagePrefix, Class<? extends Annotation> annotationClass) throws IOException
 	{
@@ -166,6 +177,9 @@ public final class ClassPathUtil
 	
 	/**
 	 * Same as {@link #getAllMethods(ClassLoader, String)}, using {@link ClassLoader#getSystemClassLoader()} as the classLoader parameter.
+	 * @param packagePrefix
+	 * @return
+	 * @throws IOException
 	 */
 	public static FluentIterable<Method> getAllMethods(String packagePrefix) throws IOException
 	{
@@ -190,12 +204,15 @@ public final class ClassPathUtil
 	
 	/**
 	 * Same as {@link #getAllMethodsAnnotatedWith(ClassLoader, String, Class)}, using {@link ClassLoader#getSystemClassLoader()} as the classLoader parameter.
+	 * @param packagePrefix
+	 * @param annotationClass
+	 * @return
+	 * @throws IOException
 	 */
 	public static FluentIterable<Method> getAllMethodsAnnotatedWith(String packagePrefix, Class<? extends Annotation> annotationClass) throws IOException
 	{
 		return getAllMethodsAnnotatedWith(ClassLoader.getSystemClassLoader(), packagePrefix, annotationClass);
 	}
-	
 	
 	/**
 	 * Loads the class inside {@link ClassInfo}
