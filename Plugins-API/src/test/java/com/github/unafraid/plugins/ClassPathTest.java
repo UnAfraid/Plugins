@@ -27,8 +27,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.lordrex34.config.util.ClassPathUtil;
 import com.github.unafraid.plugins.installers.IPluginInstaller;
-import com.github.unafraid.plugins.util.ClassPathUtil;
 
 /**
  * @author UnAfraid
@@ -38,8 +38,7 @@ public class ClassPathTest
 	@Test
 	public void pluginInstallerClassPath() throws Exception
 	{
-		final List<Class<? extends IPluginInstaller>> classes = 
-				ClassPathUtil.getAllClassesExtending("com.github.unafraid.plugins", IPluginInstaller.class).toList();
+		final List<Class<? extends IPluginInstaller>> classes = ClassPathUtil.getAllClassesExtending("com.github.unafraid.plugins", IPluginInstaller.class).toList();
 		Assert.assertNotEquals(classes.size(), 0);
 	}
 	
