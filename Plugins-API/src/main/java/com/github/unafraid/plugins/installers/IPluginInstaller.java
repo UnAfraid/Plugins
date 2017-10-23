@@ -35,12 +35,19 @@ public interface IPluginInstaller
 	 * @param plugin the plugin
 	 * @throws PluginException
 	 */
-	public void install(AbstractPlugin plugin) throws PluginException;
+	void install(AbstractPlugin plugin) throws PluginException;
+	
+	/**
+	 * Triggered whenever the plugin is being installed.
+	 * @param plugin the plugin
+	 * @throws PluginException
+	 */
+	void repair(AbstractPlugin plugin) throws PluginException;
 	
 	/**
 	 * Triggered whenever the plugin is being uninstalled.
 	 * @param plugin the plugin
 	 * @throws PluginException
 	 */
-	public void uninstall(AbstractPlugin plugin) throws PluginException;
+	void uninstall(AbstractPlugin plugin) throws PluginException;
 }
