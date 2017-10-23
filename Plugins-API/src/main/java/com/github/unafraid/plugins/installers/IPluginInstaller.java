@@ -38,7 +38,7 @@ public interface IPluginInstaller
 	void install(AbstractPlugin plugin) throws PluginException;
 	
 	/**
-	 * Triggered whenever the plugin is being installed.
+	 * Triggered whenever the plugin is being repaired.
 	 * @param plugin the plugin
 	 * @throws PluginException
 	 */
