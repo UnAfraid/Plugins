@@ -96,6 +96,17 @@ public class FileInstaller implements IPluginInstaller
 	@Override
 	public void install(AbstractPlugin plugin) throws PluginException
 	{
+		processResources(plugin, false);
+	}
+	
+	/**
+	 * Processing resource installation or repair based on parameters.
+	 * @param plugin the plugin
+	 * @param repair set to {@code false}, if install is invoked, set to {@code true} if repair
+	 * @throws PluginException
+	 */
+	private void processResources(AbstractPlugin plugin, boolean repair) throws PluginException
+	{
 		final URL location = plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
 		LOGGER.debug("Location: {} files {}, directories: {}", location, _files, _directories);
 		if (location.getProtocol().equals("file"))
@@ -112,12 +123,12 @@ public class FileInstaller implements IPluginInstaller
 					{
 						for (PluginFile file : _directories)
 						{
-							installDirectory(fs.getPath("/" + file.getSource()), plugin.getRelativePath(file.getDestination()));
+							installDirectory(fs.getPath("/" + file.getSource()), plugin.getRelativePath(file.getDestination()), repair);
 						}
 						
 						for (PluginFile file : _files)
 						{
-							installResources(fs.getPath("/" + file.getSource()), plugin.getRelativePath(file.getDestination()));
+							installResources(fs.getPath("/" + file.getSource()), plugin.getRelativePath(file.getDestination()), repair);
 						}
 					}
 					catch (Exception e)
@@ -131,12 +142,12 @@ public class FileInstaller implements IPluginInstaller
 					
 					for (PluginFile file : _directories)
 					{
-						installDirectory(path.resolve(file.getSource().startsWith("/") ? file.getSource().substring(1) : file.getSource()), plugin.getRelativePath(file.getDestination()));
+						installDirectory(path.resolve(file.getSource().startsWith("/") ? file.getSource().substring(1) : file.getSource()), plugin.getRelativePath(file.getDestination()), repair);
 					}
 					
 					for (PluginFile file : _files)
 					{
-						installResources(path.resolve(file.getSource().startsWith("/") ? file.getSource().substring(1) : file.getSource()), plugin.getRelativePath(file.getDestination()));
+						installResources(path.resolve(file.getSource().startsWith("/") ? file.getSource().substring(1) : file.getSource()), plugin.getRelativePath(file.getDestination()), repair);
 					}
 				}
 			}
@@ -155,11 +166,12 @@ public class FileInstaller implements IPluginInstaller
 	 * Installs the content of source directory into the destination.
 	 * @param source where installer should look for the original folder
 	 * @param destination where installer shall put the folder
+	 * @param repair set to {@code false}, if install is invoked, set to {@code true} if repair
 	 * @throws IOException
 	 */
-	private static void installDirectory(Path source, Path destination) throws IOException
+	private static void installDirectory(Path source, Path destination, boolean repair) throws IOException
 	{
-		LOGGER.debug("installResources: {} -> {}", source.toAbsolutePath(), destination.toAbsolutePath());
+		LOGGER.debug("installDirectory: {} -> {}", source.toAbsolutePath(), destination.toAbsolutePath());
 		
 		Files.walkFileTree(source, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
 		{
@@ -169,8 +181,16 @@ public class FileInstaller implements IPluginInstaller
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
 			{
 				_currentTarget = destination.resolve(source.relativize(dir).toString());
-				Files.createDirectories(_currentTarget);
-				LOGGER.debug("Created directories: {}", _currentTarget);
+				if (Files.notExists(_currentTarget))
+				{
+					Files.createDirectories(_currentTarget);
+					LOGGER.debug("Created directories: {}", _currentTarget);
+					
+					if (repair)
+					{
+						LOGGER.warn("Repaired missing plugin directory: {}", _currentTarget);
+					}
+				}
 				return FileVisitResult.CONTINUE;
 			}
 			
@@ -178,9 +198,17 @@ public class FileInstaller implements IPluginInstaller
 			public FileVisitResult visitFile(Path sourceFile, BasicFileAttributes attrs) throws IOException
 			{
 				final Path destinationFile = destination.resolve(source.relativize(sourceFile).toString());
-				LOGGER.debug("Copying file: {} -> {}", sourceFile, destinationFile);
-				Files.copy(Files.newInputStream(sourceFile), destinationFile, StandardCopyOption.REPLACE_EXISTING);
-				LOGGER.debug("Copied: {}", destinationFile);
+				if (Files.notExists(destinationFile))
+				{
+					LOGGER.debug("Copying file: {} -> {}", sourceFile, destinationFile);
+					Files.copy(Files.newInputStream(sourceFile), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+					LOGGER.debug("Copied: {}", destinationFile);
+					
+					if (repair)
+					{
+						LOGGER.warn("Repaired missing plugin file: {}", destinationFile);
+					}
+				}
 				return FileVisitResult.CONTINUE;
 			}
 		});
@@ -190,26 +218,38 @@ public class FileInstaller implements IPluginInstaller
 	 * Installs the source file into the destination.
 	 * @param source where installer should look for the original file
 	 * @param destination where installer shall put the file
+	 * @param repair set to {@code false}, if install is invoked, set to {@code true} if repair
 	 */
-	private static void installResources(Path source, Path destination)
+	private static void installResources(Path source, Path destination, boolean repair)
 	{
 		LOGGER.debug("installResources: {} -> {}", source.toAbsolutePath(), destination.toAbsolutePath());
 		
 		try
 		{
-			if (!Files.exists(destination))
+			if (Files.notExists(destination))
 			{
 				Files.createDirectories(destination);
+				
+				LOGGER.debug("Copying file: {} -> {}", source, destination);
+				Files.copy(Files.newInputStream(source), destination, StandardCopyOption.REPLACE_EXISTING);
+				LOGGER.debug("Copied: {}", destination);
+				
+				if (repair)
+				{
+					LOGGER.warn("Repaired missing plugin file: {}", destination);
+				}
 			}
-			
-			LOGGER.debug("Copying file: {} -> {}", source, destination);
-			Files.copy(Files.newInputStream(source), destination, StandardCopyOption.REPLACE_EXISTING);
-			LOGGER.debug("Copied: {}", destination);
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
 			LOGGER.warn("", e);
 		}
+	}
+	
+	@Override
+	public void repair(AbstractPlugin plugin) throws PluginException
+	{
+		processResources(plugin, true);
 	}
 	
 	@Override
@@ -276,7 +316,7 @@ public class FileInstaller implements IPluginInstaller
 				LOGGER.debug("Deleted plugin root: {}", pluginRoot);
 			}
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
 			throw new PluginException(e);
 		}

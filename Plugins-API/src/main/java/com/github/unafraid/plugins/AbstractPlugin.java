@@ -182,6 +182,11 @@ public abstract class AbstractPlugin
 		_conditions.testConditions(ConditionType.START, this);
 		verifyStateAndRun(() ->
 		{
+			for (IPluginInstaller installer : _installers)
+			{
+				installer.repair(this);
+			}
+			
 			for (IPluginFunction<?> function : _functions)
 			{
 				function.onStart();

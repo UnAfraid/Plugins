@@ -156,6 +156,12 @@ public class DatabaseInstaller implements IPluginInstaller
 	}
 	
 	@Override
+	public void repair(AbstractPlugin plugin)
+	{
+		// do nothing
+	}
+	
+	@Override
 	public void uninstall(AbstractPlugin plugin) throws PluginException
 	{
 		Objects.requireNonNull(plugin);

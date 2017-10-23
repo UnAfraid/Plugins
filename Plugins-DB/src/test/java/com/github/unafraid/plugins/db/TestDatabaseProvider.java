@@ -28,15 +28,14 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.unafraid.plugins.util.ClassPathUtil;
+import com.github.lordrex34.config.util.ClassPathUtil;
 
 public class TestDatabaseProvider
 {
 	@Test
 	public void testIDatabaseFactoryExistenceOnClassPath() throws IOException
 	{
-		final Set<Class<? extends IDatabaseFactory>> classes = 
-				ClassPathUtil.getAllClassesExtending("com.github.unafraid", IDatabaseFactory.class).toSet();
+		final Set<Class<? extends IDatabaseFactory>> classes = ClassPathUtil.getAllClassesExtending("com.github.unafraid", IDatabaseFactory.class).toSet();
 		
 		Assert.assertEquals(Collections.singleton(IDatabaseFactory.class), classes);
 	}
