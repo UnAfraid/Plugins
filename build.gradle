@@ -22,7 +22,7 @@ subprojects {
 	}
 	
 	group = "com.github.unafraid.plugins"
-	version = "1.0.7"
+	version = "1.0.8"
 	
 	repositories {
 		mavenCentral()
@@ -156,7 +156,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = "3.5"
+	gradleVersion = "4.5.1"
 }
 
 def getRepositoryUsername() {
