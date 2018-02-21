@@ -2,5 +2,5 @@ dependencies {
 	compile project(":Plugins-API")
 	compile(group: "org.jdbi", name: "jdbi", version: "2.78")
 	
-	testCompile (group: 'junit', name: 'junit', version: '4.12')
+	testCompile (group: "junit", name: "junit", version: "4.12")
 }
