@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2017 Rumen Nikiforov <unafraid89@gmail.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,10 +33,9 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
+import com.github.unafraid.plugins.exceptions.PluginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.unafraid.plugins.exceptions.PluginException;
 
 /**
  * This is the class that scans for available plugins.<br>
@@ -44,8 +43,7 @@ import com.github.unafraid.plugins.exceptions.PluginException;
  * @author UnAfraid
  * @param <T> refers to your own {@link AbstractPlugin} implementation abstract class, or you can use the original also
  */
-public class PluginRepository<T extends AbstractPlugin>
-{
+public class PluginRepository<T extends AbstractPlugin> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginRepository.class);
 	private final Map<String, Map<Integer, T>> plugins = new HashMap<>();
 	private final Map<T, ClassLoader> classLoaders = new HashMap<>();
@@ -55,17 +53,14 @@ public class PluginRepository<T extends AbstractPlugin>
 	 * If you aren't using IDE, you may drop your plugin JARs into "plugins" directory.
 	 * @param pluginClass here you shall provide the very same class you provided above as {@code T}
 	 */
-	public final void scan(Class<T> pluginClass)
-	{
+	public final void scan(Class<T> pluginClass) {
 		Objects.requireNonNull(pluginClass);
 		
 		// Scan for plug-ins deployed as 'jar' files
 		final int previousSize = plugins.size();
-		try
-		{
+		try {
 			final Path plugins = Paths.get("plugins");
-			if (Files.isDirectory(plugins))
-			{
+			if (Files.isDirectory(plugins)) {
 				//@formatter:off
 				Files.list(plugins)
 					.filter(path -> path.getFileName().toString().endsWith(".jar"))
@@ -87,8 +82,7 @@ public class PluginRepository<T extends AbstractPlugin>
 				//@formatter:on
 			}
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			LOGGER.warn("Failed to scan for plugins: ", e);
 		}
 		
@@ -98,12 +92,10 @@ public class PluginRepository<T extends AbstractPlugin>
 			.forEach(plugin -> processPlugin(plugin, Thread.currentThread().getContextClassLoader()));
 		//@formatter:on
 		
-		if (previousSize != plugins.size())
-		{
+		if (previousSize != plugins.size()) {
 			LOGGER.info("Discovered {} -> {} plugin(s).", previousSize, plugins.size());
 		}
-		else if (plugins.size() != 0)
-		{
+		else if (plugins.size() != 0) {
 			LOGGER.info("Reloaded {} plugin(s).", plugins.size());
 		}
 	}
@@ -113,38 +105,29 @@ public class PluginRepository<T extends AbstractPlugin>
 	 * @param plugin the plugin
 	 * @param classLoader the class loader of the plugin
 	 */
-	private void processPlugin(T plugin, ClassLoader classLoader)
-	{
+	private void processPlugin(T plugin, ClassLoader classLoader) {
 		Objects.requireNonNull(plugin);
 		Objects.requireNonNull(classLoader);
 		
 		final Map<Integer, T> plugins = this.plugins.computeIfAbsent(plugin.getName(), key -> new HashMap<>());
-		if (!plugins.containsKey(plugin.getVersion()))
-		{
+		if (!plugins.containsKey(plugin.getVersion())) {
 			final T oldPlugin = plugins.put(plugin.getVersion(), plugin);
-			if (oldPlugin != null)
-			{
+			if (oldPlugin != null) {
 				// After re-scan plugin might be changed, so stop first.
-				if (oldPlugin.getState() == PluginState.STARTED)
-				{
-					try
-					{
+				if (oldPlugin.getState() == PluginState.STARTED) {
+					try {
 						oldPlugin.stop();
 					}
-					catch (PluginException e)
-					{
+					catch (PluginException e) {
 						LOGGER.warn("Failed to stop old plugin {}", plugin.getName(), e);
 					}
 					
 					// start again
-					if (oldPlugin.getVersion() == plugin.getVersion())
-					{
-						try
-						{
+					if (oldPlugin.getVersion() == plugin.getVersion()) {
+						try {
 							plugin.start();
 						}
-						catch (PluginException e)
-						{
+						catch (PluginException e) {
 							LOGGER.warn("Failed to start new plugin {}", plugin.getName(), e);
 						}
 					}
@@ -158,27 +141,22 @@ public class PluginRepository<T extends AbstractPlugin>
 	 * Gets a {@link Map} view of all plugins.
 	 * @return all plugins
 	 */
-	public final Map<String, Map<Integer, T>> getAllPlugins()
-	{
+	public final Map<String, Map<Integer, T>> getAllPlugins() {
 		return plugins;
 	}
 	
 	/**
 	 * Starts all initialized plugins and setting them to installed.
 	 */
-	public void startAll()
-	{
+	public void startAll() {
 		getAvailablePlugins().forEach(plugin ->
 		{
-			try
-			{
-				if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED))
-				{
+			try {
+				if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED)) {
 					plugin.start();
 				}
 			}
-			catch (PluginException e)
-			{
+			catch (PluginException e) {
 				LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
 			}
 		});
@@ -187,16 +165,13 @@ public class PluginRepository<T extends AbstractPlugin>
 	/**
 	 * Stops all plugins.
 	 */
-	public void stopAll()
-	{
+	public void stopAll() {
 		getAvailablePlugins().forEach(plugin ->
 		{
-			try
-			{
+			try {
 				plugin.stop();
 			}
-			catch (PluginException e)
-			{
+			catch (PluginException e) {
 				LOGGER.warn("Failed to stop plugin {}", plugin.getName(), e);
 			}
 		});
@@ -207,8 +182,7 @@ public class PluginRepository<T extends AbstractPlugin>
 	 * @param name the plugin's name
 	 * @return available plugin
 	 */
-	public T getAvailablePlugin(String name)
-	{
+	public T getAvailablePlugin(String name) {
 		Objects.requireNonNull(name);
 		
 		//@formatter:off
@@ -222,8 +196,7 @@ public class PluginRepository<T extends AbstractPlugin>
 	 * Gets a {@link Stream} view of available plugins.
 	 * @return available plugins
 	 */
-	public final Stream<T> getAvailablePlugins()
-	{
+	public final Stream<T> getAvailablePlugins() {
 		//@formatter:off
 		return plugins.values().stream()
 			.flatMap(map -> map.values().stream())
@@ -236,8 +209,7 @@ public class PluginRepository<T extends AbstractPlugin>
 	 * @param plugin the plugin
 	 * @return class loader
 	 */
-	public final ClassLoader getClassLoader(T plugin)
-	{
+	public final ClassLoader getClassLoader(T plugin) {
 		Objects.requireNonNull(plugin);
 		return classLoaders.get(plugin);
 	}

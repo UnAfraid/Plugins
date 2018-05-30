@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2017 Rumen Nikiforov <unafraid89@gmail.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,14 +28,12 @@ import com.github.unafraid.plugins.exceptions.PluginException;
  * @param <T>
  */
 @SuppressWarnings("unused")
-public interface IPluginFunction<T extends AbstractPlugin>
-{
+public interface IPluginFunction<T extends AbstractPlugin> {
 	/**
 	 * Triggered whenever you install your plugin.
 	 * @throws PluginException
 	 */
-	default void onInstall() throws PluginException
-	{
+	default void onInstall() throws PluginException {
 		// to be overridden
 	}
 	
@@ -43,8 +41,7 @@ public interface IPluginFunction<T extends AbstractPlugin>
 	 * Triggered whenever you uninstall your plugin.
 	 * @throws PluginException
 	 */
-	default void onUninstall() throws PluginException
-	{
+	default void onUninstall() throws PluginException {
 		// to be overridden
 	}
 	
@@ -54,8 +51,7 @@ public interface IPluginFunction<T extends AbstractPlugin>
 	 * @param to actual release
 	 * @throws PluginException
 	 */
-	default void onMigrate(int from, int to) throws PluginException
-	{
+	default void onMigrate(int from, int to) throws PluginException {
 		// to be overridden
 	}
 	
@@ -75,8 +71,7 @@ public interface IPluginFunction<T extends AbstractPlugin>
 	 * Triggered whenever you reload the plugin.
 	 * @throws PluginException
 	 */
-	default void onReload() throws PluginException
-	{
+	default void onReload() throws PluginException {
 		// to be overridden
 	}
 	
