@@ -125,7 +125,7 @@ public abstract class AbstractPlugin
 	 * @param newState state to
 	 * @return {@code true} when the state is changed, otherwise {@code false}
 	 */
-	protected final boolean setState(PluginState currentState, PluginState newState)
+	public final boolean setState(PluginState currentState, PluginState newState)
 	{
 		Objects.requireNonNull(currentState);
 		Objects.requireNonNull(newState);
