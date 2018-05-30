@@ -47,8 +47,8 @@ import com.github.unafraid.plugins.exceptions.PluginException;
 public class PluginRepository<T extends AbstractPlugin>
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginRepository.class);
-	private final Map<String, Map<Integer, T>> _plugins = new HashMap<>();
-	private final Map<T, ClassLoader> _classLoaders = new HashMap<>();
+	private final Map<String, Map<Integer, T>> plugins = new HashMap<>();
+	private final Map<T, ClassLoader> classLoaders = new HashMap<>();
 	
 	/**
 	 * This method scans your classpath for the available plugins that can be initialized.<br>
@@ -60,7 +60,7 @@ public class PluginRepository<T extends AbstractPlugin>
 		Objects.requireNonNull(pluginClass);
 		
 		// Scan for plug-ins deployed as 'jar' files
-		final int previousSize = _plugins.size();
+		final int previousSize = plugins.size();
 		try
 		{
 			final Path plugins = Paths.get("plugins");
@@ -98,13 +98,13 @@ public class PluginRepository<T extends AbstractPlugin>
 			.forEach(plugin -> processPlugin(plugin, Thread.currentThread().getContextClassLoader()));
 		//@formatter:on
 		
-		if (previousSize != _plugins.size())
+		if (previousSize != plugins.size())
 		{
-			LOGGER.info("Discovered {} -> {} plugin(s).", previousSize, _plugins.size());
+			LOGGER.info("Discovered {} -> {} plugin(s).", previousSize, plugins.size());
 		}
-		else if (_plugins.size() != 0)
+		else if (plugins.size() != 0)
 		{
-			LOGGER.info("Reloaded {} plugin(s).", _plugins.size());
+			LOGGER.info("Reloaded {} plugin(s).", plugins.size());
 		}
 	}
 	
@@ -118,7 +118,7 @@ public class PluginRepository<T extends AbstractPlugin>
 		Objects.requireNonNull(plugin);
 		Objects.requireNonNull(classLoader);
 		
-		final Map<Integer, T> plugins = _plugins.computeIfAbsent(plugin.getName(), key -> new HashMap<>());
+		final Map<Integer, T> plugins = this.plugins.computeIfAbsent(plugin.getName(), key -> new HashMap<>());
 		if (!plugins.containsKey(plugin.getVersion()))
 		{
 			final T oldPlugin = plugins.put(plugin.getVersion(), plugin);
@@ -150,7 +150,7 @@ public class PluginRepository<T extends AbstractPlugin>
 					}
 				}
 			}
-			_classLoaders.put(plugin, classLoader);
+			classLoaders.put(plugin, classLoader);
 		}
 	}
 	
@@ -160,7 +160,7 @@ public class PluginRepository<T extends AbstractPlugin>
 	 */
 	public final Map<String, Map<Integer, T>> getAllPlugins()
 	{
-		return _plugins;
+		return plugins;
 	}
 	
 	/**
@@ -225,7 +225,7 @@ public class PluginRepository<T extends AbstractPlugin>
 	public final Stream<T> getAvailablePlugins()
 	{
 		//@formatter:off
-		return _plugins.values().stream()
+		return plugins.values().stream()
 			.flatMap(map -> map.values().stream())
 			.sorted(Comparator.comparingInt(T::getVersion).reversed());
 		//@formatter:on
@@ -239,6 +239,6 @@ public class PluginRepository<T extends AbstractPlugin>
 	public final ClassLoader getClassLoader(T plugin)
 	{
 		Objects.requireNonNull(plugin);
-		return _classLoaders.get(plugin);
+		return classLoaders.get(plugin);
 	}
 }

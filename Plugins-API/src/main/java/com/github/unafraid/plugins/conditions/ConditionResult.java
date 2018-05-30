@@ -27,8 +27,8 @@ package com.github.unafraid.plugins.conditions;
  */
 public class ConditionResult
 {
-	private final boolean _isSuccess;
-	private final String _description;
+	private final boolean isSuccess;
+	private final String description;
 	
 	/**
 	 * Constructs a new condition result.
@@ -37,8 +37,8 @@ public class ConditionResult
 	 */
 	public ConditionResult(boolean isSuccess, String description)
 	{
-		_isSuccess = isSuccess;
-		_description = description;
+		this.isSuccess = isSuccess;
+		this.description = description;
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class ConditionResult
 	 */
 	public boolean isSuccess()
 	{
-		return _isSuccess;
+		return isSuccess;
 	}
 	
 	/**
@@ -56,7 +56,7 @@ public class ConditionResult
 	 */
 	public String describe()
 	{
-		return _description;
+		return description;
 	}
 	
 	@Override
@@ -64,8 +64,8 @@ public class ConditionResult
 	{
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((_description == null) ? 0 : _description.hashCode());
-		result = (prime * result) + (_isSuccess ? 1231 : 1237);
+		result = (prime * result) + ((description == null) ? 0 : description.hashCode());
+		result = (prime * result) + (isSuccess ? 1231 : 1237);
 		return result;
 	}
 	
@@ -85,18 +85,18 @@ public class ConditionResult
 			return false;
 		}
 		final ConditionResult other = (ConditionResult) obj;
-		if (_description == null)
+		if (description == null)
 		{
-			if (other._description != null)
+			if (other.description != null)
 			{
 				return false;
 			}
 		}
-		else if (!_description.equals(other._description))
+		else if (!description.equals(other.description))
 		{
 			return false;
 		}
-		if (_isSuccess != other._isSuccess)
+		if (isSuccess != other.isSuccess)
 		{
 			return false;
 		}

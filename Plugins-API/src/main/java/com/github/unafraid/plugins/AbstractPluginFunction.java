@@ -29,11 +29,11 @@ import java.util.Objects;
  */
 public abstract class AbstractPluginFunction<T extends AbstractPlugin> implements IPluginFunction<T>
 {
-	private final T _plugin;
+	private final T plugin;
 	
 	public AbstractPluginFunction(T plugin)
 	{
-		_plugin = Objects.requireNonNull(plugin);
+		this.plugin = Objects.requireNonNull(plugin);
 	}
 	
 	/**
@@ -43,6 +43,6 @@ public abstract class AbstractPluginFunction<T extends AbstractPlugin> implement
 	@Override
 	public final T getPlugin()
 	{
-		return _plugin;
+		return plugin;
 	}
 }

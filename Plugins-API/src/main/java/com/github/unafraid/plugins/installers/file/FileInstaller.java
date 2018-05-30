@@ -52,8 +52,8 @@ public class FileInstaller implements IPluginInstaller
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(FileInstaller.class);
 	
-	private final Set<PluginFile> _files = new HashSet<>();
-	private final Set<PluginFile> _directories = new HashSet<>();
+	private final Set<PluginFile> files = new HashSet<>();
+	private final Set<PluginFile> directories = new HashSet<>();
 	
 	/**
 	 * Registers a file into this installer.
@@ -62,7 +62,7 @@ public class FileInstaller implements IPluginInstaller
 	 */
 	public void addFile(String source, String destination)
 	{
-		_files.add(new PluginFile(source, destination));
+		files.add(new PluginFile(source, destination));
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class FileInstaller implements IPluginInstaller
 	 */
 	public void addFolder(String source, String destination)
 	{
-		_directories.add(new PluginFile(source, destination));
+		directories.add(new PluginFile(source, destination));
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class FileInstaller implements IPluginInstaller
 	 */
 	public Set<PluginFile> getFiles()
 	{
-		return _files;
+		return files;
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class FileInstaller implements IPluginInstaller
 	 */
 	public Set<PluginFile> getDirectories()
 	{
-		return _directories;
+		return directories;
 	}
 	
 	@Override
@@ -108,7 +108,7 @@ public class FileInstaller implements IPluginInstaller
 	private void processResources(AbstractPlugin plugin, boolean repair) throws PluginException
 	{
 		final URL location = plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
-		LOGGER.debug("Location: {} files {}, directories: {}", location, _files, _directories);
+		LOGGER.debug("Location: {} files {}, directories: {}", location, files, directories);
 		if (location.getProtocol().equals("file"))
 		{
 			try
@@ -121,12 +121,12 @@ public class FileInstaller implements IPluginInstaller
 					
 					try (FileSystem fs = FileSystems.newFileSystem(path, Thread.currentThread().getContextClassLoader()))
 					{
-						for (PluginFile file : _directories)
+						for (PluginFile file : directories)
 						{
 							installDirectory(fs.getPath("/" + file.getSource()), plugin.getRelativePath(file.getDestination()), repair);
 						}
 						
-						for (PluginFile file : _files)
+						for (PluginFile file : files)
 						{
 							installResources(fs.getPath("/" + file.getSource()), plugin.getRelativePath(file.getDestination()), repair);
 						}
@@ -140,12 +140,12 @@ public class FileInstaller implements IPluginInstaller
 				{
 					LOGGER.debug("Getting resources from ClassPath.");
 					
-					for (PluginFile file : _directories)
+					for (PluginFile file : directories)
 					{
 						installDirectory(path.resolve(file.getSource().startsWith("/") ? file.getSource().substring(1) : file.getSource()), plugin.getRelativePath(file.getDestination()), repair);
 					}
 					
-					for (PluginFile file : _files)
+					for (PluginFile file : files)
 					{
 						installResources(path.resolve(file.getSource().startsWith("/") ? file.getSource().substring(1) : file.getSource()), plugin.getRelativePath(file.getDestination()), repair);
 					}
@@ -257,14 +257,14 @@ public class FileInstaller implements IPluginInstaller
 	{
 		try
 		{
-			for (PluginFile file : _files)
+			for (PluginFile file : files)
 			{
 				final Path destFile = plugin.getRelativePath(file.getDestination());
 				Files.deleteIfExists(destFile);
 				LOGGER.debug("Deleted file: {}", destFile);
 			}
 			
-			for (PluginFile dir : _directories)
+			for (PluginFile dir : directories)
 			{
 				final Path destFile = plugin.getRelativePath(dir.getDestination());
 				Files.walkFileTree(destFile, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>()
@@ -327,8 +327,8 @@ public class FileInstaller implements IPluginInstaller
 	{
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((_directories == null) ? 0 : _directories.hashCode());
-		result = (prime * result) + ((_files == null) ? 0 : _files.hashCode());
+		result = (prime * result) + ((directories == null) ? 0 : directories.hashCode());
+		result = (prime * result) + ((files == null) ? 0 : files.hashCode());
 		return result;
 	}
 	
@@ -348,25 +348,25 @@ public class FileInstaller implements IPluginInstaller
 			return false;
 		}
 		final FileInstaller other = (FileInstaller) obj;
-		if (_directories == null)
+		if (directories == null)
 		{
-			if (other._directories != null)
+			if (other.directories != null)
 			{
 				return false;
 			}
 		}
-		else if (!_directories.equals(other._directories))
+		else if (!directories.equals(other.directories))
 		{
 			return false;
 		}
-		if (_files == null)
+		if (files == null)
 		{
-			if (other._files != null)
+			if (other.files != null)
 			{
 				return false;
 			}
 		}
-		else if (!_files.equals(other._files))
+		else if (!files.equals(other.files))
 		{
 			return false;
 		}

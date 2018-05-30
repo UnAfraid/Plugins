@@ -49,12 +49,12 @@ import com.github.unafraid.plugins.util.ThrowableRunnable;
  */
 public abstract class AbstractPlugin
 {
-	private final PluginConditions _conditions = new PluginConditions();
-	private final FileInstaller _fileInstaller = new FileInstaller();
-	private final PluginMigrations _migrations = new PluginMigrations();
-	private final List<IPluginInstaller> _installers = new ArrayList<>(Collections.singleton(_fileInstaller));
-	private final AtomicReference<PluginState> _state = new AtomicReference<>(PluginState.AVAILABLE);
-	private final Set<IPluginFunction<? extends AbstractPlugin>> _functions = new LinkedHashSet<>();
+	private final PluginConditions conditions = new PluginConditions();
+	private final FileInstaller fileInstaller = new FileInstaller();
+	private final PluginMigrations migrations = new PluginMigrations();
+	private final List<IPluginInstaller> installers = new ArrayList<>(Collections.singleton(fileInstaller));
+	private final AtomicReference<PluginState> state = new AtomicReference<>(PluginState.AVAILABLE);
+	private final Set<IPluginFunction<? extends AbstractPlugin>> functions = new LinkedHashSet<>();
 	
 	/**
 	 * Gets the name of the plugin.<br>
@@ -98,7 +98,7 @@ public abstract class AbstractPlugin
 	 */
 	public final <T extends AbstractPlugin, R extends IPluginFunction<T>> R getFunction(Class<R> functionClass)
 	{
-		return _functions.stream().filter(function -> functionClass.isInstance(function)).map(functionClass::cast).findFirst().orElse(null);
+		return functions.stream().filter(function -> functionClass.isInstance(function)).map(functionClass::cast).findFirst().orElse(null);
 	}
 	
 	/**
@@ -108,7 +108,7 @@ public abstract class AbstractPlugin
 	 */
 	protected <T extends AbstractPlugin> void registerFunction(IPluginFunction<T> function)
 	{
-		_functions.add(function);
+		functions.add(function);
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public abstract class AbstractPlugin
 		Objects.requireNonNull(currentState);
 		Objects.requireNonNull(newState);
 		
-		if (_state.compareAndSet(currentState, newState))
+		if (state.compareAndSet(currentState, newState))
 		{
 			onStateChanged(currentState, newState);
 			return true;
@@ -144,7 +144,7 @@ public abstract class AbstractPlugin
 	 */
 	public final PluginState getState()
 	{
-		return _state.get();
+		return state.get();
 	}
 	
 	/**
@@ -165,7 +165,7 @@ public abstract class AbstractPlugin
 	{
 		try
 		{
-			verifyStateAndRun(() -> setup(_fileInstaller, _migrations, _conditions), PluginState.AVAILABLE, PluginState.INITIALIZED);
+			verifyStateAndRun(() -> setup(fileInstaller, migrations, conditions), PluginState.AVAILABLE, PluginState.INITIALIZED);
 		}
 		catch (PluginException e)
 		{
@@ -179,15 +179,15 @@ public abstract class AbstractPlugin
 	 */
 	public final void start() throws PluginException
 	{
-		_conditions.testConditions(ConditionType.START, this);
+		conditions.testConditions(ConditionType.START, this);
 		verifyStateAndRun(() ->
 		{
-			for (IPluginInstaller installer : _installers)
+			for (IPluginInstaller installer : installers)
 			{
 				installer.repair(this);
 			}
 			
-			for (IPluginFunction<?> function : _functions)
+			for (IPluginFunction<?> function : functions)
 			{
 				function.onStart();
 			}
@@ -200,10 +200,10 @@ public abstract class AbstractPlugin
 	 */
 	public final void stop() throws PluginException
 	{
-		_conditions.testConditions(ConditionType.STOP, this);
+		conditions.testConditions(ConditionType.STOP, this);
 		verifyStateAndRun(() ->
 		{
-			for (IPluginFunction<?> function : _functions)
+			for (IPluginFunction<?> function : functions)
 			{
 				function.onStop();
 			}
@@ -216,8 +216,8 @@ public abstract class AbstractPlugin
 	 */
 	public final void reload() throws PluginException
 	{
-		_conditions.testConditions(ConditionType.RELOAD, this);
-		for (IPluginFunction<?> function : _functions)
+		conditions.testConditions(ConditionType.RELOAD, this);
+		for (IPluginFunction<?> function : functions)
 		{
 			function.onReload();
 		}
@@ -229,15 +229,15 @@ public abstract class AbstractPlugin
 	 */
 	public final void install() throws PluginException
 	{
-		_conditions.testConditions(ConditionType.INSTALL, this);
+		conditions.testConditions(ConditionType.INSTALL, this);
 		verifyStateAndRun(() ->
 		{
-			for (IPluginInstaller installer : _installers)
+			for (IPluginInstaller installer : installers)
 			{
 				installer.install(this);
 			}
 			
-			for (IPluginFunction<?> function : _functions)
+			for (IPluginFunction<?> function : functions)
 			{
 				function.onInstall();
 			}
@@ -250,15 +250,15 @@ public abstract class AbstractPlugin
 	 */
 	public final void uninstall() throws PluginException
 	{
-		_conditions.testConditions(ConditionType.UNINSTALL, this);
+		conditions.testConditions(ConditionType.UNINSTALL, this);
 		verifyStateAndRun(() ->
 		{
-			for (IPluginInstaller installer : _installers)
+			for (IPluginInstaller installer : installers)
 			{
 				installer.uninstall(this);
 			}
 			
-			for (IPluginFunction<?> function : _functions)
+			for (IPluginFunction<?> function : functions)
 			{
 				function.onUninstall();
 			}
@@ -273,12 +273,12 @@ public abstract class AbstractPlugin
 	 */
 	public final void migrate(int from, int to) throws PluginException
 	{
-		_conditions.testConditions(ConditionType.MIGRATION, this);
+		conditions.testConditions(ConditionType.MIGRATION, this);
 		verifyStateAndRun(() ->
 		{
-			_migrations.migrate(from, to, this);
+			migrations.migrate(from, to, this);
 			
-			for (IPluginFunction<?> function : _functions)
+			for (IPluginFunction<?> function : functions)
 			{
 				function.onMigrate(from, to);
 			}
@@ -318,7 +318,7 @@ public abstract class AbstractPlugin
 	 */
 	public final PluginConditions getConditions()
 	{
-		return _conditions;
+		return conditions;
 	}
 	
 	/**
@@ -327,7 +327,7 @@ public abstract class AbstractPlugin
 	 */
 	public final FileInstaller getFileInstaller()
 	{
-		return _fileInstaller;
+		return fileInstaller;
 	}
 	
 	/**
@@ -336,7 +336,7 @@ public abstract class AbstractPlugin
 	 */
 	public final List<IPluginInstaller> getInstallers()
 	{
-		return _installers;
+		return installers;
 	}
 	
 	/**
@@ -345,7 +345,7 @@ public abstract class AbstractPlugin
 	 */
 	public final PluginMigrations getMigrations()
 	{
-		return _migrations;
+		return migrations;
 	}
 	
 	/**
@@ -415,12 +415,12 @@ public abstract class AbstractPlugin
 	{
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((_conditions == null) ? 0 : _conditions.hashCode());
-		result = (prime * result) + ((_fileInstaller == null) ? 0 : _fileInstaller.hashCode());
-		result = (prime * result) + ((_functions == null) ? 0 : _functions.hashCode());
-		result = (prime * result) + ((_installers == null) ? 0 : _installers.hashCode());
-		result = (prime * result) + ((_migrations == null) ? 0 : _migrations.hashCode());
-		result = (prime * result) + ((_state == null) ? 0 : _state.hashCode());
+		result = (prime * result) + ((conditions == null) ? 0 : conditions.hashCode());
+		result = (prime * result) + ((fileInstaller == null) ? 0 : fileInstaller.hashCode());
+		result = (prime * result) + ((functions == null) ? 0 : functions.hashCode());
+		result = (prime * result) + ((installers == null) ? 0 : installers.hashCode());
+		result = (prime * result) + ((migrations == null) ? 0 : migrations.hashCode());
+		result = (prime * result) + ((state == null) ? 0 : state.hashCode());
 		return result;
 	}
 	
@@ -440,69 +440,69 @@ public abstract class AbstractPlugin
 			return false;
 		}
 		AbstractPlugin other = (AbstractPlugin) obj;
-		if (_conditions == null)
+		if (conditions == null)
 		{
-			if (other._conditions != null)
+			if (other.conditions != null)
 			{
 				return false;
 			}
 		}
-		else if (!_conditions.equals(other._conditions))
+		else if (!conditions.equals(other.conditions))
 		{
 			return false;
 		}
-		if (_fileInstaller == null)
+		if (fileInstaller == null)
 		{
-			if (other._fileInstaller != null)
+			if (other.fileInstaller != null)
 			{
 				return false;
 			}
 		}
-		else if (!_fileInstaller.equals(other._fileInstaller))
+		else if (!fileInstaller.equals(other.fileInstaller))
 		{
 			return false;
 		}
-		if (_functions == null)
+		if (functions == null)
 		{
-			if (other._functions != null)
+			if (other.functions != null)
 			{
 				return false;
 			}
 		}
-		else if (!_functions.equals(other._functions))
+		else if (!functions.equals(other.functions))
 		{
 			return false;
 		}
-		if (_installers == null)
+		if (installers == null)
 		{
-			if (other._installers != null)
+			if (other.installers != null)
 			{
 				return false;
 			}
 		}
-		else if (!_installers.equals(other._installers))
+		else if (!installers.equals(other.installers))
 		{
 			return false;
 		}
-		if (_migrations == null)
+		if (migrations == null)
 		{
-			if (other._migrations != null)
+			if (other.migrations != null)
 			{
 				return false;
 			}
 		}
-		else if (!_migrations.equals(other._migrations))
+		else if (!migrations.equals(other.migrations))
 		{
 			return false;
 		}
-		if (_state == null)
+		if (state == null)
 		{
-			if (other._state != null)
+			if (other.state != null)
 			{
 				return false;
 			}
 		}
-		else if (!_state.equals(other._state))
+		else if (!state.equals(other.state))
 		{
 			return false;
 		}

@@ -29,8 +29,8 @@ import java.util.StringJoiner;
  */
 public class PluginFile
 {
-	private final String _source;
-	private final String _destination;
+	private final String source;
+	private final String destination;
 	
 	/**
 	 * Constructs the plugin file.
@@ -39,8 +39,8 @@ public class PluginFile
 	 */
 	public PluginFile(String source, String destination)
 	{
-		_source = source;
-		_destination = destination;
+		this.source = source;
+		this.destination = destination;
 	}
 	
 	/**
@@ -49,7 +49,7 @@ public class PluginFile
 	 */
 	public String getSource()
 	{
-		return _source;
+		return source;
 	}
 	
 	/**
@@ -58,15 +58,15 @@ public class PluginFile
 	 */
 	public String getDestination()
 	{
-		return _destination;
+		return destination;
 	}
 	
 	@Override
 	public String toString()
 	{
 		final StringJoiner sj = new StringJoiner(", ", getClass().getSimpleName() + "[", "]");
-		sj.add("source: " + _source);
-		sj.add("destination: " + _destination);
+		sj.add("source: " + source);
+		sj.add("destination: " + destination);
 		return sj.toString();
 	}
 	
@@ -75,8 +75,8 @@ public class PluginFile
 	{
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((_destination == null) ? 0 : _destination.hashCode());
-		result = (prime * result) + ((_source == null) ? 0 : _source.hashCode());
+		result = (prime * result) + ((destination == null) ? 0 : destination.hashCode());
+		result = (prime * result) + ((source == null) ? 0 : source.hashCode());
 		return result;
 	}
 	
@@ -96,25 +96,25 @@ public class PluginFile
 			return false;
 		}
 		final PluginFile other = (PluginFile) obj;
-		if (_destination == null)
+		if (destination == null)
 		{
-			if (other._destination != null)
+			if (other.destination != null)
 			{
 				return false;
 			}
 		}
-		else if (!_destination.equals(other._destination))
+		else if (!destination.equals(other.destination))
 		{
 			return false;
 		}
-		if (_source == null)
+		if (source == null)
 		{
-			if (other._source != null)
+			if (other.source != null)
 			{
 				return false;
 			}
 		}
-		else if (!_source.equals(other._source))
+		else if (!source.equals(other.source))
 		{
 			return false;
 		}

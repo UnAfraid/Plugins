@@ -36,7 +36,7 @@ import com.github.unafraid.plugins.exceptions.PluginException;
  */
 public class PluginConditions
 {
-	private final Map<ConditionType, Set<IPluginCondition>> _conditions = new EnumMap<>(ConditionType.class);
+	private final Map<ConditionType, Set<IPluginCondition>> conditions = new EnumMap<>(ConditionType.class);
 	
 	/**
 	 * Registers a condition into this storage class if it isn't there already.
@@ -45,7 +45,7 @@ public class PluginConditions
 	 */
 	public void addCondition(ConditionType type, IPluginCondition condition)
 	{
-		_conditions.computeIfAbsent(type, key -> new HashSet<>()).add(condition);
+		conditions.computeIfAbsent(type, key -> new HashSet<>()).add(condition);
 	}
 	
 	/**
@@ -55,7 +55,7 @@ public class PluginConditions
 	 */
 	public Set<IPluginCondition> getConditions(ConditionType type)
 	{
-		return _conditions.getOrDefault(type, Collections.emptySet());
+		return conditions.getOrDefault(type, Collections.emptySet());
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class PluginConditions
 	{
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((_conditions == null) ? 0 : _conditions.hashCode());
+		result = (prime * result) + ((conditions == null) ? 0 : conditions.hashCode());
 		return result;
 	}
 	
@@ -101,14 +101,14 @@ public class PluginConditions
 			return false;
 		}
 		PluginConditions other = (PluginConditions) obj;
-		if (_conditions == null)
+		if (conditions == null)
 		{
-			if (other._conditions != null)
+			if (other.conditions != null)
 			{
 				return false;
 			}
 		}
-		else if (!_conditions.equals(other._conditions))
+		else if (!conditions.equals(other.conditions))
 		{
 			return false;
 		}
