@@ -48,6 +48,18 @@ public class PluginRepository<T extends AbstractPlugin> {
 	private final Map<String, Map<Integer, T>> plugins = new HashMap<>();
 	private final Map<T, ClassLoader> classLoaders = new HashMap<>();
 	
+	private final Path pluginsPath;
+	private final ClassLoader parentClassLoader;
+	
+	public PluginRepository(Path pluginsPath, ClassLoader parentClassLoader) {
+		this.pluginsPath = pluginsPath;
+		this.parentClassLoader = parentClassLoader;
+	}
+	
+	public PluginRepository() {
+		this(Paths.get("plugins"), null);
+	}
+	
 	/**
 	 * This method scans your classpath for the available plugins that can be initialized.<br>
 	 * If you aren't using IDE, you may drop your plugin JARs into "plugins" directory.
@@ -59,17 +71,16 @@ public class PluginRepository<T extends AbstractPlugin> {
 		// Scan for plug-ins deployed as 'jar' files
 		final int previousSize = plugins.size();
 		try {
-			final Path plugins = Paths.get("plugins");
-			if (Files.isDirectory(plugins)) {
+			if (Files.isDirectory(pluginsPath)) {
 				//@formatter:off
-				Files.list(plugins)
+				Files.list(pluginsPath)
 					.filter(path -> path.getFileName().toString().endsWith(".jar"))
 					.forEach(path -> 
 					{
 						try
 						{
 							final URL url = path.toUri().toURL();
-							final URLClassLoader classLoader = new URLClassLoader(new URL[] { url });
+							final URLClassLoader classLoader = parentClassLoader != null ? new URLClassLoader(new URL[] { url }, parentClassLoader) : new URLClassLoader(new URL[] { url });
 							ServiceLoader.load(pluginClass, classLoader)
 								.forEach(plugin -> processPlugin(plugin, classLoader));
 						}
