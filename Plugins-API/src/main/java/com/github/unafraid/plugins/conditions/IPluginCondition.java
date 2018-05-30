@@ -32,12 +32,12 @@ public interface IPluginCondition {
 	 * Gets the information related to this condition.
 	 * @return information
 	 */
-	public String getInformation();
+	String getInformation();
 	
 	/**
 	 * Fires the condition.
 	 * @param plugin the plugin
 	 * @return condition result
 	 */
-	public ConditionResult test(AbstractPlugin plugin);
+	ConditionResult test(AbstractPlugin plugin);
 }

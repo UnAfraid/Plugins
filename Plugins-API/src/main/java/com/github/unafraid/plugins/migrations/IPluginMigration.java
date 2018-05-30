@@ -33,17 +33,17 @@ public interface IPluginMigration {
 	 * In short: the reason of change, what happened, etc.
 	 * @return description
 	 */
-	public String getDescription();
+	String getDescription();
 	
 	/**
 	 * The target version where migrations is applicable.
 	 * @return target version
 	 */
-	public int getTargetVersion();
+	int getTargetVersion();
 	
 	/**
 	 * Triggered whenever the plugin is being migrated.
 	 * @param plugin the plugin
 	 */
-	public void migrate(AbstractPlugin plugin);
+	void migrate(AbstractPlugin plugin);
 }
