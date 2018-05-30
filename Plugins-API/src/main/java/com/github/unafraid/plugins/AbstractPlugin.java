@@ -376,12 +376,11 @@ public abstract class AbstractPlugin {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((conditions == null) ? 0 : conditions.hashCode());
-		result = (prime * result) + ((fileInstaller == null) ? 0 : fileInstaller.hashCode());
-		result = (prime * result) + ((functions == null) ? 0 : functions.hashCode());
-		result = (prime * result) + ((installers == null) ? 0 : installers.hashCode());
-		result = (prime * result) + ((migrations == null) ? 0 : migrations.hashCode());
-		result = (prime * result) + ((state == null) ? 0 : state.hashCode());
+		result = (prime * result) + ((getName() == null) ? 0 : getName().hashCode());
+		result = (prime * result) + ((getAuthor() == null) ? 0 : getAuthor().hashCode());
+		result = (prime * result) + ((getCreatedAt() == null) ? 0 : getCreatedAt().hashCode());
+		result = (prime * result) + ((getDescription() == null) ? 0 : getDescription().hashCode());
+		result = (prime * result) + getVersion();
 		return result;
 	}
 	
@@ -396,55 +395,24 @@ public abstract class AbstractPlugin {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
+		
 		AbstractPlugin other = (AbstractPlugin) obj;
-		if (conditions == null) {
-			if (other.conditions != null) {
-				return false;
-			}
-		}
-		else if (!conditions.equals(other.conditions)) {
+		if (!Objects.equals(getName(), other.getName())) {
 			return false;
 		}
-		if (fileInstaller == null) {
-			if (other.fileInstaller != null) {
-				return false;
-			}
-		}
-		else if (!fileInstaller.equals(other.fileInstaller)) {
+		if (!Objects.equals(getAuthor(), other.getAuthor())) {
 			return false;
 		}
-		if (functions == null) {
-			if (other.functions != null) {
-				return false;
-			}
-		}
-		else if (!functions.equals(other.functions)) {
+		if (!Objects.equals(getCreatedAt(), other.getCreatedAt())) {
 			return false;
 		}
-		if (installers == null) {
-			if (other.installers != null) {
-				return false;
-			}
-		}
-		else if (!installers.equals(other.installers)) {
+		if (!Objects.equals(getDescription(), other.getDescription())) {
 			return false;
 		}
-		if (migrations == null) {
-			if (other.migrations != null) {
-				return false;
-			}
-		}
-		else if (!migrations.equals(other.migrations)) {
+		if (getVersion() != other.getVersion()) {
 			return false;
 		}
-		if (state == null) {
-			if (other.state != null) {
-				return false;
-			}
-		}
-		else if (!state.equals(other.state)) {
-			return false;
-		}
+		
 		return true;
 	}
 }
