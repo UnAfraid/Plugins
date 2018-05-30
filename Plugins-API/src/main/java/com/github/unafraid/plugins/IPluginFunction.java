@@ -79,5 +79,5 @@ public interface IPluginFunction<T extends AbstractPlugin> {
 	 * Gets the plugin owner of this function
 	 * @return the plugin itself
 	 */
-	public T getPlugin();
+	T getPlugin();
 }

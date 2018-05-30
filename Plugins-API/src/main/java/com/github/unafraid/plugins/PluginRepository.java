@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginRepository<T extends AbstractPlugin> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginRepository.class);
+	
 	private final Map<String, Map<Integer, T>> plugins = new HashMap<>();
 	private final Map<T, ClassLoader> classLoaders = new HashMap<>();
 	
@@ -68,29 +69,25 @@ public class PluginRepository<T extends AbstractPlugin> {
 	public final void scan(Class<T> pluginClass) {
 		Objects.requireNonNull(pluginClass);
 		
-		// Scan for plug-ins deployed as 'jar' files
+		// Scan for plug-ins deployed as 'jar' files.
 		final int previousSize = plugins.size();
 		try {
 			if (Files.isDirectory(pluginsPath)) {
-				//@formatter:off
 				Files.list(pluginsPath)
 					.filter(path -> path.getFileName().toString().endsWith(".jar"))
-					.forEach(path -> 
-					{
-						try
+					.forEach(path ->
 						{
-							final URL url = path.toUri().toURL();
-							final URLClassLoader classLoader = parentClassLoader != null ? new URLClassLoader(new URL[] { url }, parentClassLoader) : new URLClassLoader(new URL[] { url });
-							ServiceLoader.load(pluginClass, classLoader)
-								.forEach(plugin -> processPlugin(plugin, classLoader));
+							try {
+								final URL url = path.toUri().toURL();
+								final URLClassLoader classLoader = parentClassLoader != null ? new URLClassLoader(new URL[] { url }, parentClassLoader) : new URLClassLoader(new URL[] { url });
+								ServiceLoader.load(pluginClass, classLoader)
+									.forEach(plugin -> processPlugin(plugin, classLoader));
+							}
+							catch (Exception e) {
+								LOGGER.warn("Failed to convert path: {} to URI/URL", path, e);
+							}
 						}
-						catch (Exception e)
-						{
-							LOGGER.warn("Failed to convert path: {} to URI/URL", path, e);
-						}
-					}
-				);
-				//@formatter:on
+					);
 			}
 		}
 		catch (Exception e) {
@@ -98,10 +95,8 @@ public class PluginRepository<T extends AbstractPlugin> {
 		}
 		
 		// Scan general class loader for plug-ins (Debug project include)
-		//@formatter:off
 		ServiceLoader.load(pluginClass)
 			.forEach(plugin -> processPlugin(plugin, Thread.currentThread().getContextClassLoader()));
-		//@formatter:on
 		
 		if (previousSize != plugins.size()) {
 			LOGGER.info("Discovered {} -> {} plugin(s).", previousSize, plugins.size());
@@ -160,8 +155,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 	 * Starts all initialized plugins and setting them to installed.
 	 */
 	public void startAll() {
-		getAvailablePlugins().forEach(plugin ->
-		{
+		getAvailablePlugins().forEach(plugin -> {
 			try {
 				if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED)) {
 					plugin.start();
@@ -177,8 +171,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 	 * Stops all plugins.
 	 */
 	public void stopAll() {
-		getAvailablePlugins().forEach(plugin ->
-		{
+		getAvailablePlugins().forEach(plugin -> {
 			try {
 				plugin.stop();
 			}
@@ -196,11 +189,10 @@ public class PluginRepository<T extends AbstractPlugin> {
 	public T getAvailablePlugin(String name) {
 		Objects.requireNonNull(name);
 		
-		//@formatter:off
 		return getAvailablePlugins()
 			.filter(plugin -> name.equalsIgnoreCase(plugin.getName()))
-			.findFirst().orElse(null);
-		//@formatter:on
+			.findFirst()
+			.orElse(null);
 	}
 	
 	/**
@@ -208,11 +200,10 @@ public class PluginRepository<T extends AbstractPlugin> {
 	 * @return available plugins
 	 */
 	public final Stream<T> getAvailablePlugins() {
-		//@formatter:off
-		return plugins.values().stream()
+		return plugins.values()
+			.stream()
 			.flatMap(map -> map.values().stream())
 			.sorted(Comparator.comparingInt(T::getVersion).reversed());
-		//@formatter:on
 	}
 	
 	/**
