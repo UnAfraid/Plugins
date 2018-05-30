@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2017 Rumen Nikiforov <unafraid89@gmail.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,8 +34,7 @@ import com.github.unafraid.plugins.exceptions.PluginException;
  * Stores the conditions.
  * @author UnAfraid
  */
-public class PluginConditions
-{
+public class PluginConditions {
 	private final Map<ConditionType, Set<IPluginCondition>> conditions = new EnumMap<>(ConditionType.class);
 	
 	/**
@@ -43,8 +42,7 @@ public class PluginConditions
 	 * @param type type of the condition
 	 * @param condition the condition itself
 	 */
-	public void addCondition(ConditionType type, IPluginCondition condition)
-	{
+	public void addCondition(ConditionType type, IPluginCondition condition) {
 		conditions.computeIfAbsent(type, key -> new HashSet<>()).add(condition);
 	}
 	
@@ -53,8 +51,7 @@ public class PluginConditions
 	 * @param type the type given by the user
 	 * @return conditions
 	 */
-	public Set<IPluginCondition> getConditions(ConditionType type)
-	{
+	public Set<IPluginCondition> getConditions(ConditionType type) {
 		return conditions.getOrDefault(type, Collections.emptySet());
 	}
 	
@@ -64,21 +61,17 @@ public class PluginConditions
 	 * @param plugin the plugin
 	 * @throws PluginException
 	 */
-	public void testConditions(ConditionType type, AbstractPlugin plugin) throws PluginException
-	{
-		for (IPluginCondition condition : getConditions(type))
-		{
+	public void testConditions(ConditionType type, AbstractPlugin plugin) throws PluginException {
+		for (IPluginCondition condition : getConditions(type)) {
 			final ConditionResult result = condition.test(plugin);
-			if ((result == null) || !result.isSuccess())
-			{
+			if ((result == null) || !result.isSuccess()) {
 				throw new PluginException(result == null ? "ConditionResult is null!" : result.describe());
 			}
 		}
 	}
 	
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((conditions == null) ? 0 : conditions.hashCode());
@@ -86,30 +79,23 @@ public class PluginConditions
 	}
 	
 	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj)
-		{
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (obj == null)
-		{
+		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass())
-		{
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		PluginConditions other = (PluginConditions) obj;
-		if (conditions == null)
-		{
-			if (other.conditions != null)
-			{
+		if (conditions == null) {
+			if (other.conditions != null) {
 				return false;
 			}
 		}
-		else if (!conditions.equals(other.conditions))
-		{
+		else if (!conditions.equals(other.conditions)) {
 			return false;
 		}
 		return true;

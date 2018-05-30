@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2017 Rumen Nikiforov <unafraid89@gmail.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,8 +43,7 @@ import com.github.unafraid.plugins.installers.IPluginInstaller;
  * Database installer that allows database queries upon install/uninstall, executed automatically as plugin is installed or uninstalled
  * @author UnAfraid
  */
-public class DatabaseInstaller implements IPluginInstaller
-{
+public class DatabaseInstaller implements IPluginInstaller {
 	private final Set<PluginDatabaseFile> _installFiles = new HashSet<>();
 	private final Set<PluginDatabaseFile> _uninstallFiles = new HashSet<>();
 	
@@ -54,8 +53,7 @@ public class DatabaseInstaller implements IPluginInstaller
 	 * @param name if present makes sure table doesn't exists before executing resource file
 	 * @param database if present switches the database over to specified one before executing resource file
 	 */
-	public void addTable(String source, Optional<String> name, Optional<String> database)
-	{
+	public void addTable(String source, Optional<String> name, Optional<String> database) {
 		_installFiles.add(new PluginDatabaseFile(source, name, database));
 	}
 	
@@ -65,166 +63,136 @@ public class DatabaseInstaller implements IPluginInstaller
 	 * @param name if present makes sure table exists before executing resource file
 	 * @param database if present switches the database over to specified one before executing resource file
 	 */
-	public void addUninstallFile(String source, Optional<String> name, Optional<String> database)
-	{
+	public void addUninstallFile(String source, Optional<String> name, Optional<String> database) {
 		_uninstallFiles.add(new PluginDatabaseFile(source, name, database));
 	}
 	
 	/**
 	 * @return Set of database plugin files that are going to be executed when plugin install is requested
 	 */
-	public Set<PluginDatabaseFile> getInstallFiles()
-	{
+	public Set<PluginDatabaseFile> getInstallFiles() {
 		return _installFiles;
 	}
 	
 	/**
 	 * @return Set of database plugin files that are going to be executed when plugin uninstall is requested
 	 */
-	public Set<PluginDatabaseFile> getUninstallFiles()
-	{
+	public Set<PluginDatabaseFile> getUninstallFiles() {
 		return _uninstallFiles;
 	}
 	
 	@Override
-	public void install(AbstractPlugin plugin) throws PluginException
-	{
+	public void install(AbstractPlugin plugin) throws PluginException {
 		Objects.requireNonNull(plugin);
 		
-		try (Connection con = DatabaseProvider.DATABASE_FACTORY.getConnection();
-			Statement st = con.createStatement())
-		{
+		try (
+			Connection con = DatabaseProvider.DATABASE_FACTORY.getConnection();
+			Statement st = con.createStatement()) {
 			// Prevent half-way execution
 			con.setAutoCommit(false);
 			
-			for (PluginDatabaseFile file : _installFiles)
-			{
+			for (PluginDatabaseFile file : _installFiles) {
 				String currentDatabase = "";
-				try (ResultSet rs = st.executeQuery("SELECT DATABASE()"))
-				{
-					if (rs.next())
-					{
+				try (ResultSet rs = st.executeQuery("SELECT DATABASE()")) {
+					if (rs.next()) {
 						currentDatabase = rs.getString(1);
 					}
 				}
 				
-				if (file.getDatabase().isPresent())
-				{
+				if (file.getDatabase().isPresent()) {
 					// Switch database
 					st.execute("USE " + file.getDatabase().get());
 				}
 				
 				// Check for table existence
-				if (file.getName().isPresent())
-				{
-					try (PreparedStatement ps = con.prepareStatement("SHOW TABLES LIKE ?"))
-					{
+				if (file.getName().isPresent()) {
+					try (PreparedStatement ps = con.prepareStatement("SHOW TABLES LIKE ?")) {
 						ps.setString(1, file.getName().get());
-						try (ResultSet rs = ps.executeQuery())
-						{
-							if (!rs.next())
-							{
+						try (ResultSet rs = ps.executeQuery()) {
+							if (!rs.next()) {
 								// Execute the resource
 								executeResource(plugin, file.getSource(), st);
 							}
 						}
 					}
 				}
-				else
-				{
+				else {
 					// Execute the resource
 					executeResource(plugin, file.getSource(), st);
 				}
 				
-				if (file.getDatabase().isPresent())
-				{
+				if (file.getDatabase().isPresent()) {
 					// Switch database back to its original state
 					st.execute("USE " + currentDatabase);
 				}
 			}
 			
-			if (!con.getAutoCommit())
-			{
+			if (!con.getAutoCommit()) {
 				con.commit();
 				con.setAutoCommit(true);
 			}
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			throw new PluginException(e);
 		}
 	}
 	
 	@Override
-	public void repair(AbstractPlugin plugin)
-	{
+	public void repair(AbstractPlugin plugin) {
 		// do nothing
 	}
 	
 	@Override
-	public void uninstall(AbstractPlugin plugin) throws PluginException
-	{
+	public void uninstall(AbstractPlugin plugin) throws PluginException {
 		Objects.requireNonNull(plugin);
 		
-		try (Connection con = DatabaseProvider.DATABASE_FACTORY.getConnection();
-			Statement st = con.createStatement())
-		{
+		try (
+			Connection con = DatabaseProvider.DATABASE_FACTORY.getConnection();
+			Statement st = con.createStatement()) {
 			// Prevent half-way execution
 			con.setAutoCommit(false);
 			
-			for (PluginDatabaseFile file : _uninstallFiles)
-			{
+			for (PluginDatabaseFile file : _uninstallFiles) {
 				String currentDatabase = "";
-				try (ResultSet rs = st.executeQuery("SELECT DATABASE()"))
-				{
-					if (rs.next())
-					{
+				try (ResultSet rs = st.executeQuery("SELECT DATABASE()")) {
+					if (rs.next()) {
 						currentDatabase = rs.getString(1);
 					}
 				}
 				
-				if (file.getDatabase().isPresent())
-				{
+				if (file.getDatabase().isPresent()) {
 					// Switch database
 					st.execute("USE " + file.getDatabase().get());
 				}
 				
 				// Check for table existence
-				if (file.getName().isPresent())
-				{
-					try (PreparedStatement ps = con.prepareStatement("SHOW TABLES LIKE ?"))
-					{
+				if (file.getName().isPresent()) {
+					try (PreparedStatement ps = con.prepareStatement("SHOW TABLES LIKE ?")) {
 						ps.setString(1, file.getName().get());
-						try (ResultSet rs = ps.executeQuery())
-						{
-							if (rs.next())
-							{
+						try (ResultSet rs = ps.executeQuery()) {
+							if (rs.next()) {
 								// Execute the resource
 								executeResource(plugin, file.getSource(), st);
 							}
 						}
 					}
 				}
-				else
-				{
+				else {
 					// Execute the resource
 					executeResource(plugin, file.getSource(), st);
 				}
-				if (file.getDatabase().isPresent())
-				{
+				if (file.getDatabase().isPresent()) {
 					// Switch database back to its original state
 					st.execute("USE " + currentDatabase);
 				}
 			}
 			
-			if (!con.getAutoCommit())
-			{
+			if (!con.getAutoCommit()) {
 				con.commit();
 				con.setAutoCommit(true);
 			}
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			throw new PluginException(e);
 		}
 	}
@@ -236,37 +204,31 @@ public class DatabaseInstaller implements IPluginInstaller
 	 * @param st the SQL statement used for the process
 	 * @throws Exception
 	 */
-	private void executeResource(AbstractPlugin plugin, String source, Statement st) throws Exception
-	{
+	private void executeResource(AbstractPlugin plugin, String source, Statement st) throws Exception {
 		Objects.requireNonNull(plugin);
 		Objects.requireNonNull(source);
 		Objects.requireNonNull(st);
 		
-		try (InputStream inputStream = plugin.getClass().getResourceAsStream(source);
+		try (
+			InputStream inputStream = plugin.getClass().getResourceAsStream(source);
 			InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-			Scanner scn = new Scanner(reader))
-		{
+			Scanner scn = new Scanner(reader)) {
 			StringBuilder sb = new StringBuilder();
-			while (scn.hasNextLine())
-			{
+			while (scn.hasNextLine()) {
 				String line = scn.nextLine();
-				if (line.startsWith("--"))
-				{
+				if (line.startsWith("--")) {
 					continue;
 				}
-				else if (line.contains("--"))
-				{
+				else if (line.contains("--")) {
 					line = line.split("--")[0];
 				}
 				
 				line = line.trim();
-				if (!line.isEmpty())
-				{
+				if (!line.isEmpty()) {
 					sb.append(line + System.lineSeparator());
 				}
 				
-				if (line.endsWith(";"))
-				{
+				if (line.endsWith(";")) {
 					st.execute(sb.toString());
 					sb = new StringBuilder();
 				}
@@ -275,8 +237,7 @@ public class DatabaseInstaller implements IPluginInstaller
 	}
 	
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((_installFiles == null) ? 0 : _installFiles.hashCode());
@@ -285,41 +246,31 @@ public class DatabaseInstaller implements IPluginInstaller
 	}
 	
 	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj)
-		{
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (obj == null)
-		{
+		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass())
-		{
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final DatabaseInstaller other = (DatabaseInstaller) obj;
-		if (_installFiles == null)
-		{
-			if (other._installFiles != null)
-			{
+		if (_installFiles == null) {
+			if (other._installFiles != null) {
 				return false;
 			}
 		}
-		else if (!_installFiles.equals(other._installFiles))
-		{
+		else if (!_installFiles.equals(other._installFiles)) {
 			return false;
 		}
-		if (_uninstallFiles == null)
-		{
-			if (other._uninstallFiles != null)
-			{
+		if (_uninstallFiles == null) {
+			if (other._uninstallFiles != null) {
 				return false;
 			}
 		}
-		else if (!_uninstallFiles.equals(other._uninstallFiles))
-		{
+		else if (!_uninstallFiles.equals(other._uninstallFiles)) {
 			return false;
 		}
 		return true;

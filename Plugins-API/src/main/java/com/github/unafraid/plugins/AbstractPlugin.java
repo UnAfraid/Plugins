@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2017 Rumen Nikiforov <unafraid89@gmail.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,8 +47,7 @@ import com.github.unafraid.plugins.util.ThrowableRunnable;
  * <b>do not forget to invoke {@link #init()} in the <u>constructor</u> of your plugin. Otherwise it will not work!</b>
  * @author UnAfraid
  */
-public abstract class AbstractPlugin
-{
+public abstract class AbstractPlugin {
 	private final PluginConditions conditions = new PluginConditions();
 	private final FileInstaller fileInstaller = new FileInstaller();
 	private final PluginMigrations migrations = new PluginMigrations();
@@ -96,8 +95,7 @@ public abstract class AbstractPlugin
 	 * @param functionClass
 	 * @return an instance of a function
 	 */
-	public final <T extends AbstractPlugin, R extends IPluginFunction<T>> R getFunction(Class<R> functionClass)
-	{
+	public final <T extends AbstractPlugin, R extends IPluginFunction<T>> R getFunction(Class<R> functionClass) {
 		return functions.stream().filter(function -> functionClass.isInstance(function)).map(functionClass::cast).findFirst().orElse(null);
 	}
 	
@@ -106,8 +104,7 @@ public abstract class AbstractPlugin
 	 * @param <T> the generic plugin type
 	 * @param function the function of the plugin
 	 */
-	protected <T extends AbstractPlugin> void registerFunction(IPluginFunction<T> function)
-	{
+	protected <T extends AbstractPlugin> void registerFunction(IPluginFunction<T> function) {
 		functions.add(function);
 	}
 	
@@ -125,13 +122,11 @@ public abstract class AbstractPlugin
 	 * @param newState state to
 	 * @return {@code true} when the state is changed, otherwise {@code false}
 	 */
-	public final boolean setState(PluginState currentState, PluginState newState)
-	{
+	public final boolean setState(PluginState currentState, PluginState newState) {
 		Objects.requireNonNull(currentState);
 		Objects.requireNonNull(newState);
 		
-		if (state.compareAndSet(currentState, newState))
-		{
+		if (state.compareAndSet(currentState, newState)) {
 			onStateChanged(currentState, newState);
 			return true;
 		}
@@ -142,8 +137,7 @@ public abstract class AbstractPlugin
 	 * Gets the actual state of the plugin.
 	 * @return state
 	 */
-	public final PluginState getState()
-	{
+	public final PluginState getState() {
 		return state.get();
 	}
 	
@@ -152,8 +146,7 @@ public abstract class AbstractPlugin
 	 * @param oldState the previous state
 	 * @param newState the actual state
 	 */
-	public void onStateChanged(PluginState oldState, PluginState newState)
-	{
+	public void onStateChanged(PluginState oldState, PluginState newState) {
 		// to be overridden
 	}
 	
@@ -161,14 +154,11 @@ public abstract class AbstractPlugin
 	 * A mandatory method that must be triggered in the constructor of your plugin.<br>
 	 * Sets up the plugin's environment related things and changed the plugin's state from available to initialized.
 	 */
-	protected final void init()
-	{
-		try
-		{
+	protected final void init() {
+		try {
 			verifyStateAndRun(() -> setup(fileInstaller, migrations, conditions), PluginState.AVAILABLE, PluginState.INITIALIZED);
 		}
-		catch (PluginException e)
-		{
+		catch (PluginException e) {
 			throw new PluginRuntimeException(e);
 		}
 	}
@@ -177,18 +167,15 @@ public abstract class AbstractPlugin
 	 * Starts your plugin or throws an exception.
 	 * @throws PluginException
 	 */
-	public final void start() throws PluginException
-	{
+	public final void start() throws PluginException {
 		conditions.testConditions(ConditionType.START, this);
 		verifyStateAndRun(() ->
 		{
-			for (IPluginInstaller installer : installers)
-			{
+			for (IPluginInstaller installer : installers) {
 				installer.repair(this);
 			}
 			
-			for (IPluginFunction<?> function : functions)
-			{
+			for (IPluginFunction<?> function : functions) {
 				function.onStart();
 			}
 		}, PluginState.INSTALLED, PluginState.STARTED);
@@ -198,13 +185,11 @@ public abstract class AbstractPlugin
 	 * Stops your plugin or throws an exception.
 	 * @throws PluginException
 	 */
-	public final void stop() throws PluginException
-	{
+	public final void stop() throws PluginException {
 		conditions.testConditions(ConditionType.STOP, this);
 		verifyStateAndRun(() ->
 		{
-			for (IPluginFunction<?> function : functions)
-			{
+			for (IPluginFunction<?> function : functions) {
 				function.onStop();
 			}
 		}, PluginState.STARTED, PluginState.INSTALLED);
@@ -214,11 +199,9 @@ public abstract class AbstractPlugin
 	 * Reloads your plugin or throws an exception.
 	 * @throws PluginException
 	 */
-	public final void reload() throws PluginException
-	{
+	public final void reload() throws PluginException {
 		conditions.testConditions(ConditionType.RELOAD, this);
-		for (IPluginFunction<?> function : functions)
-		{
+		for (IPluginFunction<?> function : functions) {
 			function.onReload();
 		}
 	}
@@ -227,18 +210,15 @@ public abstract class AbstractPlugin
 	 * Installs your plugin or throws an exception.
 	 * @throws PluginException
 	 */
-	public final void install() throws PluginException
-	{
+	public final void install() throws PluginException {
 		conditions.testConditions(ConditionType.INSTALL, this);
 		verifyStateAndRun(() ->
 		{
-			for (IPluginInstaller installer : installers)
-			{
+			for (IPluginInstaller installer : installers) {
 				installer.install(this);
 			}
 			
-			for (IPluginFunction<?> function : functions)
-			{
+			for (IPluginFunction<?> function : functions) {
 				function.onInstall();
 			}
 		}, PluginState.INITIALIZED, PluginState.INSTALLED);
@@ -248,18 +228,15 @@ public abstract class AbstractPlugin
 	 * Uninstalls your plugin or throws an exception.
 	 * @throws PluginException
 	 */
-	public final void uninstall() throws PluginException
-	{
+	public final void uninstall() throws PluginException {
 		conditions.testConditions(ConditionType.UNINSTALL, this);
 		verifyStateAndRun(() ->
 		{
-			for (IPluginInstaller installer : installers)
-			{
+			for (IPluginInstaller installer : installers) {
 				installer.uninstall(this);
 			}
 			
-			for (IPluginFunction<?> function : functions)
-			{
+			for (IPluginFunction<?> function : functions) {
 				function.onUninstall();
 			}
 		}, PluginState.INSTALLED, PluginState.INITIALIZED);
@@ -271,15 +248,13 @@ public abstract class AbstractPlugin
 	 * @param to the actual (newer) version
 	 * @throws PluginException
 	 */
-	public final void migrate(int from, int to) throws PluginException
-	{
+	public final void migrate(int from, int to) throws PluginException {
 		conditions.testConditions(ConditionType.MIGRATION, this);
 		verifyStateAndRun(() ->
 		{
 			migrations.migrate(from, to, this);
 			
-			for (IPluginFunction<?> function : functions)
-			{
+			for (IPluginFunction<?> function : functions) {
 				function.onMigrate(from, to);
 			}
 		}, PluginState.INSTALLED, getState());
@@ -292,17 +267,14 @@ public abstract class AbstractPlugin
 	 * @param newState the actual (newer) state (to)
 	 * @throws PluginException
 	 */
-	private void verifyStateAndRun(ThrowableRunnable run, PluginState expectedState, PluginState newState) throws PluginException
-	{
+	private void verifyStateAndRun(ThrowableRunnable run, PluginState expectedState, PluginState newState) throws PluginException {
 		Objects.requireNonNull(run);
 		Objects.requireNonNull(expectedState);
 		Objects.requireNonNull(newState);
 		
 		final PluginState currentState = getState();
-		if (expectedState == currentState)
-		{
-			if (setState(currentState, newState))
-			{
+		if (expectedState == currentState) {
+			if (setState(currentState, newState)) {
 				run.run();
 				return;
 			}
@@ -316,8 +288,7 @@ public abstract class AbstractPlugin
 	 * Gets the plugin condition holder.
 	 * @return conditions
 	 */
-	public final PluginConditions getConditions()
-	{
+	public final PluginConditions getConditions() {
 		return conditions;
 	}
 	
@@ -325,8 +296,7 @@ public abstract class AbstractPlugin
 	 * Gets the file installer.
 	 * @return file installer
 	 */
-	public final FileInstaller getFileInstaller()
-	{
+	public final FileInstaller getFileInstaller() {
 		return fileInstaller;
 	}
 	
@@ -334,8 +304,7 @@ public abstract class AbstractPlugin
 	 * Gets a list of the plugin installers that implements {@link IPluginInstaller}.
 	 * @return plugin installer list
 	 */
-	public final List<IPluginInstaller> getInstallers()
-	{
+	public final List<IPluginInstaller> getInstallers() {
 		return installers;
 	}
 	
@@ -343,8 +312,7 @@ public abstract class AbstractPlugin
 	 * Gets the plugin migrations storage.
 	 * @return migrations
 	 */
-	public final PluginMigrations getMigrations()
-	{
+	public final PluginMigrations getMigrations() {
 		return migrations;
 	}
 	
@@ -353,8 +321,7 @@ public abstract class AbstractPlugin
 	 * @param paths path parameters given by the user
 	 * @return normalised path
 	 */
-	private Path getNormalizedPath(String... paths)
-	{
+	private Path getNormalizedPath(String... paths) {
 		final String[] totalPaths = new String[paths.length + 1];
 		totalPaths[0] = getName();
 		System.arraycopy(paths, 0, totalPaths, 1, paths.length);
@@ -366,8 +333,7 @@ public abstract class AbstractPlugin
 	 * @param paths path parameters given by the user
 	 * @return absolute path
 	 */
-	public final Path getAbsolutePath(String... paths)
-	{
+	public final Path getAbsolutePath(String... paths) {
 		return getNormalizedPath(paths).toAbsolutePath();
 	}
 	
@@ -376,8 +342,7 @@ public abstract class AbstractPlugin
 	 * @param paths
 	 * @return absolute path
 	 */
-	public final String getAbsolutePathString(String... paths)
-	{
+	public final String getAbsolutePathString(String... paths) {
 		return getAbsolutePath(paths).toString();
 	}
 	
@@ -386,8 +351,7 @@ public abstract class AbstractPlugin
 	 * @param paths path parameters given by the user
 	 * @return relative path
 	 */
-	public final Path getRelativePath(String... paths)
-	{
+	public final Path getRelativePath(String... paths) {
 		return getNormalizedPath(paths);
 	}
 	
@@ -396,8 +360,7 @@ public abstract class AbstractPlugin
 	 * @param paths path given by the user
 	 * @return relative path
 	 */
-	public final String getRelativePathString(String... paths)
-	{
+	public final String getRelativePathString(String... paths) {
 		return getRelativePath(paths).toString();
 	}
 	
@@ -405,14 +368,12 @@ public abstract class AbstractPlugin
 	 * Gets plugin's priority.
 	 * @return priority
 	 */
-	public int getPriority()
-	{
+	public int getPriority() {
 		return 0;
 	}
 	
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((conditions == null) ? 0 : conditions.hashCode());
@@ -425,85 +386,63 @@ public abstract class AbstractPlugin
 	}
 	
 	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj)
-		{
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (obj == null)
-		{
+		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass())
-		{
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		AbstractPlugin other = (AbstractPlugin) obj;
-		if (conditions == null)
-		{
-			if (other.conditions != null)
-			{
+		if (conditions == null) {
+			if (other.conditions != null) {
 				return false;
 			}
 		}
-		else if (!conditions.equals(other.conditions))
-		{
+		else if (!conditions.equals(other.conditions)) {
 			return false;
 		}
-		if (fileInstaller == null)
-		{
-			if (other.fileInstaller != null)
-			{
+		if (fileInstaller == null) {
+			if (other.fileInstaller != null) {
 				return false;
 			}
 		}
-		else if (!fileInstaller.equals(other.fileInstaller))
-		{
+		else if (!fileInstaller.equals(other.fileInstaller)) {
 			return false;
 		}
-		if (functions == null)
-		{
-			if (other.functions != null)
-			{
+		if (functions == null) {
+			if (other.functions != null) {
 				return false;
 			}
 		}
-		else if (!functions.equals(other.functions))
-		{
+		else if (!functions.equals(other.functions)) {
 			return false;
 		}
-		if (installers == null)
-		{
-			if (other.installers != null)
-			{
+		if (installers == null) {
+			if (other.installers != null) {
 				return false;
 			}
 		}
-		else if (!installers.equals(other.installers))
-		{
+		else if (!installers.equals(other.installers)) {
 			return false;
 		}
-		if (migrations == null)
-		{
-			if (other.migrations != null)
-			{
+		if (migrations == null) {
+			if (other.migrations != null) {
 				return false;
 			}
 		}
-		else if (!migrations.equals(other.migrations))
-		{
+		else if (!migrations.equals(other.migrations)) {
 			return false;
 		}
-		if (state == null)
-		{
-			if (other.state != null)
-			{
+		if (state == null) {
+			if (other.state != null) {
 				return false;
 			}
 		}
-		else if (!state.equals(other.state))
-		{
+		else if (!state.equals(other.state)) {
 			return false;
 		}
 		return true;

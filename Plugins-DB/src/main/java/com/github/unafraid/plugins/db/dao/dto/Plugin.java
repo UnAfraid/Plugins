@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2017 Rumen Nikiforov <unafraid89@gmail.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,8 +27,7 @@ import java.util.Date;
  * A simple holder class storing plugin DB information.
  * @author UnAfraid
  */
-public class Plugin
-{
+public class Plugin {
 	private final int id;
 	private final String name;
 	private final int version;
@@ -42,8 +41,7 @@ public class Plugin
 	 * @param installedOn
 	 * @param autoStart
 	 */
-	public Plugin(int id, String name, int version, long installedOn, int autoStart)
-	{
+	public Plugin(int id, String name, int version, long installedOn, int autoStart) {
 		this.id = id;
 		this.name = name;
 		this.version = version;
@@ -54,46 +52,40 @@ public class Plugin
 	/**
 	 * @return the id
 	 */
-	public int getId()
-	{
+	public int getId() {
 		return id;
 	}
 	
 	/**
 	 * @return the name
 	 */
-	public String getName()
-	{
+	public String getName() {
 		return name;
 	}
 	
 	/**
 	 * @return the version
 	 */
-	public int getVersion()
-	{
+	public int getVersion() {
 		return version;
 	}
 	
 	/**
 	 * @return the installedOn
 	 */
-	public long getInstalledOn()
-	{
+	public long getInstalledOn() {
 		return installedOn;
 	}
 	
 	/**
 	 * @return the autoStart
 	 */
-	public boolean isAutoStart()
-	{
+	public boolean isAutoStart() {
 		return autoStart == 1;
 	}
 	
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("ID: ").append(getId()).append(", ");
 		sb.append("Name: ").append(getName()).append(", ");

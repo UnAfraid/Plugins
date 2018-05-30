@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2017 Rumen Nikiforov <unafraid89@gmail.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,16 +33,14 @@ import com.github.unafraid.plugins.exceptions.PluginException;
  * Migration happens whenever you upgrade your plugin from an older version to a newer.
  * @author UnAfraid
  */
-public class PluginMigrations
-{
+public class PluginMigrations {
 	private final Set<IPluginMigration> migrations = new HashSet<>();
 	
 	/**
 	 * Registers a migration into this storage class.
 	 * @param migration
 	 */
-	public void addMigration(IPluginMigration migration)
-	{
+	public void addMigration(IPluginMigration migration) {
 		migrations.add(migration);
 	}
 	
@@ -50,8 +48,7 @@ public class PluginMigrations
 	 * Gets a {@link Set} view of the migrations.
 	 * @return migrations
 	 */
-	public Set<IPluginMigration> getMigrations()
-	{
+	public Set<IPluginMigration> getMigrations() {
 		return migrations;
 	}
 	
@@ -62,10 +59,8 @@ public class PluginMigrations
 	 * @param plugin the plugin
 	 * @throws PluginException
 	 */
-	public void migrate(int from, int to, AbstractPlugin plugin) throws PluginException
-	{
-		if (from >= to)
-		{
+	public void migrate(int from, int to, AbstractPlugin plugin) throws PluginException {
+		if (from >= to) {
 			throw new PluginException("Cannot migrate from " + from + " >= to" + to + "!");
 		}
 		
