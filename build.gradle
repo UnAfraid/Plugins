@@ -12,32 +12,32 @@ subprojects {
 	apply plugin: "maven-publish"
 	apply plugin: "signing"
 	apply plugin: "findbugs"
-	
+
 	sourceCompatibility = JavaVersion.VERSION_1_8
-	
+
 	gitPublishConfig {
 		org = "UnAfraid"
 		repo = "Plugins"
 		branch = "releases"
 	}
-	
+
 	group = "com.github.unafraid.plugins"
 	version = "1.0.8"
-	
+
 	repositories {
 		mavenCentral()
 	}
-	
+
 	eclipse {
 		project {
 			natures("org.springsource.ide.eclipse.gradle.core.nature")
 		}
 	}
-	
+
 	findbugs {
 		findbugsTest.enabled = false
 	}
-	
+
 	tasks.withType(FindBugs) {
 		reports {
 			xml.enabled false
@@ -45,7 +45,7 @@ subprojects {
 		}
 		excludeFilter = file("$rootProject.projectDir/excludeFilter.xml")
 	}
-	
+
 	tasks.eclipse.doLast {
 		copy {
 			from("../eclipse-settings")
@@ -56,7 +56,7 @@ subprojects {
 	tasks.cleanEclipse.doLast {
 		delete(".settings")
 	}
-	
+
 	tasks.withType(JavaCompile) {
 		options.encoding = "UTF-8"
 	}
@@ -64,35 +64,35 @@ subprojects {
 	tasks.withType(Javadoc) {
 		options.addStringOption("Xdoclint:none", "-quiet")
 	}
-	
+
 	task javadocJar(type: Jar) {
 		classifier = "javadoc"
 		from javadoc
 	}
-	
+
 	task sourcesJar(type: Jar) {
 		classifier = "sources"
 		from sourceSets.main.allSource
 	}
-	
+
 	tasks.withType(Javadoc) {
 		options.addStringOption("Xdoclint:none", "-quiet")
 	}
-	
+
 	artifacts {
 		archives javadocJar, sourcesJar
 	}
-	
+
 	signing {
 		required { gradle.taskGraph.hasTask("uploadArchives") }
 		sign configurations.archives
 	}
-	
+
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
 				from components.java
-	
+
 				artifact sourcesJar
 			}
 		}
@@ -102,32 +102,32 @@ subprojects {
 			}
 		}
 	}
-	
+
 	uploadArchives {
 		repositories {
 			mavenDeployer {
 				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-	
+
 				repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
 					authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
 				}
-	
+
 				snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
 					authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
 				}
-	
+
 				pom.project {
 					name project.name
 					packaging "jar"
 					description "Generic Plugins API"
 					url "https://github.com/UnAfraid/Plugins"
-	
+
 					scm {
 						connection "scm:git:git@github.com:UnAfraid/Plugins.git"
 						developerConnection "scm:git:git@github.com:UnAfraid/Plugins.git"
 						url "git@github.com:UnAfraid/Plugins.git"
 					}
-	
+
 					licenses {
 						license {
 							name "MIT License"
@@ -135,7 +135,7 @@ subprojects {
 							distribution "repo"
 						}
 					}
-	
+
 					developers {
 						developer {
 							id "UnAfraid"
@@ -156,7 +156,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = "4.5.1"
+	gradleVersion = "4.7"
 }
 
 def getRepositoryUsername() {

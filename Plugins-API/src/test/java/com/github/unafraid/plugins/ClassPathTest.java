@@ -24,7 +24,7 @@ package com.github.unafraid.plugins;
 import java.io.IOException;
 import java.util.List;
 
-import com.github.lordrex34.config.util.ClassPathUtil;
+import com.github.lordrex34.reflection.util.ClassPathUtil;
 import com.github.unafraid.plugins.installers.IPluginInstaller;
 import org.junit.Assert;
 import org.junit.Test;
