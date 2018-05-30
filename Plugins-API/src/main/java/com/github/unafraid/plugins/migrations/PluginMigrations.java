@@ -35,7 +35,7 @@ import com.github.unafraid.plugins.exceptions.PluginException;
  */
 public class PluginMigrations
 {
-	private final Set<IPluginMigration> _migrations = new HashSet<>();
+	private final Set<IPluginMigration> migrations = new HashSet<>();
 	
 	/**
 	 * Registers a migration into this storage class.
@@ -43,7 +43,7 @@ public class PluginMigrations
 	 */
 	public void addMigration(IPluginMigration migration)
 	{
-		_migrations.add(migration);
+		migrations.add(migration);
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class PluginMigrations
 	 */
 	public Set<IPluginMigration> getMigrations()
 	{
-		return _migrations;
+		return migrations;
 	}
 	
 	/**
@@ -70,7 +70,7 @@ public class PluginMigrations
 		}
 		
 		//@formatter:off
-		_migrations.stream()
+		migrations.stream()
 			.sorted(Comparator.comparingInt(IPluginMigration::getTargetVersion))
 			.filter(migration -> migration.getTargetVersion() >= from)
 			.forEach(migration -> migration.migrate(plugin));
@@ -83,7 +83,7 @@ public class PluginMigrations
 	{
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((_migrations == null) ? 0 : _migrations.hashCode());
+		result = (prime * result) + ((migrations == null) ? 0 : migrations.hashCode());
 		return result;
 	}
 
@@ -104,14 +104,14 @@ public class PluginMigrations
 			return false;
 		}
 		final PluginMigrations other = (PluginMigrations) obj;
-		if (_migrations == null)
+		if (migrations == null)
 		{
-			if (other._migrations != null)
+			if (other.migrations != null)
 			{
 				return false;
 			}
 		}
-		else if (!_migrations.equals(other._migrations))
+		else if (!migrations.equals(other.migrations))
 		{
 			return false;
 		}
