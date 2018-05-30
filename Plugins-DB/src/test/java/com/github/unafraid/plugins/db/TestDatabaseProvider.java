@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
-import com.github.lordrex34.config.util.ClassPathUtil;
+import com.github.lordrex34.reflection.util.ClassPathUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
