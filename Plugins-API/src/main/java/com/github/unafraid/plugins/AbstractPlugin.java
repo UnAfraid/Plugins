@@ -320,26 +320,50 @@ public abstract class AbstractPlugin {
 		return migrations;
 	}
 	
+	/**
+	 * Sets the plugin root that is being used by plugin file installers.
+	 * @param pluginsPath the plugin root chosen by the user
+	 */
 	final void setPluginsPath(Path pluginsPath) {
 		this.pluginsPath = pluginsPath;
 	}
 	
+	/**
+	 * Gets the plugin root path that is being used by plugin file installers.
+	 * @return plugins path
+	 */
 	public final Path getPluginsPath() {
 		return pluginsPath;
 	}
 	
+	/**
+	 * Sets the JAR file's path. (internal usage only)
+	 * @param jarPath path of the JAR that contains the plugin
+	 */
 	final void setJarPath(Path jarPath) {
 		this.jarPath = jarPath;
 	}
 	
+	/**
+	 * Gets the JAR file's path that contains the plugin.
+	 * @return JAR file's path
+	 */
 	public final Path getJarPath() {
 		return jarPath;
 	}
 	
+	/**
+	 * Sets the JAR's hash. (internal usage only)
+	 * @param jarHash the hash of the JAR file that contains the plugin
+	 */
 	final void setJarHash(String jarHash) {
 		this.jarHash = jarHash;
 	}
 	
+	/**
+	 * Gets the JAR file's hash that contains the plugin.
+	 * @return JAR hash
+	 */
 	public final String getJarHash() {
 		return jarHash;
 	}
