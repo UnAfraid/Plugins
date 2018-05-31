@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 import com.github.unafraid.plugins.exceptions.PluginException;
 import com.github.unafraid.plugins.util.FileHashUtil;
+import com.github.unafraid.plugins.util.JarClassLoader;
 import com.github.unafraid.plugins.util.PathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +86,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 						{
 							try {
 								final URL url = path.toUri().toURL();
-								final URLClassLoader classLoader = parentClassLoader != null ? new URLClassLoader(new URL[] { url }, parentClassLoader) : new URLClassLoader(new URL[] { url });
+								final JarClassLoader classLoader = parentClassLoader != null ? new JarClassLoader(new URL[] { url }, parentClassLoader) : new JarClassLoader(new URL[] { url });
 								for (T plugin : ServiceLoader.load(pluginClass, classLoader)) {
 									plugin.setPluginsPath(pluginsPath);
 									plugin.setJarPath(path);
