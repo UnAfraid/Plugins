@@ -82,8 +82,14 @@ public class PluginRepository<T extends AbstractPlugin> {
 							try {
 								final URL url = path.toUri().toURL();
 								final URLClassLoader classLoader = parentClassLoader != null ? new URLClassLoader(new URL[] { url }, parentClassLoader) : new URLClassLoader(new URL[] { url });
-								ServiceLoader.load(pluginClass, classLoader)
-									.forEach(plugin -> processPlugin(plugin, classLoader));
+								for (T plugin : ServiceLoader.load(pluginClass, classLoader)) {
+									try {
+										processPlugin(plugin, classLoader);
+									}
+									catch (PluginException e) {
+										LOGGER.warn("Failed to process plugin {}.", plugin, e);
+									}
+								}
 							}
 							catch (Exception e) {
 								LOGGER.warn("Failed to convert path: {} to URI/URL", path, e);
@@ -97,8 +103,14 @@ public class PluginRepository<T extends AbstractPlugin> {
 		}
 		
 		// Scan general class loader for plug-ins (Debug project include)
-		ServiceLoader.load(pluginClass)
-			.forEach(plugin -> processPlugin(plugin, Thread.currentThread().getContextClassLoader()));
+		for (T plugin : ServiceLoader.load(pluginClass)) {
+			try {
+				processPlugin(plugin, Thread.currentThread().getContextClassLoader());
+			}
+			catch (PluginException e) {
+				LOGGER.warn("Failed to process plugin {}.", plugin, e);
+			}
+		}
 		
 		if (previousSize != plugins.size()) {
 			LOGGER.info("Discovered {} -> {} plugin(s).", previousSize, plugins.size());
@@ -113,7 +125,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 	 * @param plugin the plugin
 	 * @param classLoader the class loader of the plugin
 	 */
-	private void processPlugin(T plugin, ClassLoader classLoader) {
+	private void processPlugin(T plugin, ClassLoader classLoader) throws PluginException {
 		Objects.requireNonNull(plugin);
 		Objects.requireNonNull(classLoader);
 		
@@ -121,44 +133,41 @@ public class PluginRepository<T extends AbstractPlugin> {
 		if (!plugins.containsKey(plugin.getVersion())) {
 			final T oldPlugin = plugins.put(plugin.getVersion(), plugin);
 			if (oldPlugin != null) {
+				final boolean wasStarted = oldPlugin.getState() == PluginState.STARTED;
 				
 				// After re-scan plugin might be changed, so stop first.
-				final boolean wasStarted = oldPlugin.getState() == PluginState.STARTED;
 				if (wasStarted) {
-					try {
-						oldPlugin.stop();
-					}
-					catch (PluginException e) {
-						LOGGER.warn("Failed to stop old plugin {}", plugin.getName(), e);
-					}
+					oldPlugin.stop();
 				}
 				
-				final ClassLoader oldClassLoader = classLoaders.get(oldPlugin);
-				if (oldClassLoader instanceof Closeable) {
-					try {
-						((Closeable) oldClassLoader).close();
-					}
-					catch (IOException e) {
-						LOGGER.warn("Failed to close old classloader!", e);
-					}
-				}
-				classLoaders.remove(oldPlugin);
+				classLoaderCleanup(oldPlugin);
 				
 				// Start again.
 				if (wasStarted) {
-					if (oldPlugin.getVersion() == plugin.getVersion()) {
-						try {
-							plugin.start();
-						}
-						catch (PluginException e) {
-							LOGGER.warn("Failed to start new plugin {}", plugin.getName(), e);
-						}
-					}
+					plugin.start();
 				}
 			}
 			
 			classLoaders.put(plugin, classLoader);
 		}
+	}
+	
+	/**
+	 * Closes the old classloader which isn't needed anymore, and also removes it from the map.
+	 * @param oldPlugin the old plugin whose class loader needs to be cleaned
+	 * @throws PluginException
+	 */
+	private void classLoaderCleanup(T oldPlugin) throws PluginException {
+		final ClassLoader oldClassLoader = classLoaders.get(oldPlugin);
+		if (oldClassLoader instanceof Closeable) {
+			try {
+				((Closeable) oldClassLoader).close();
+			}
+			catch (IOException e) {
+				throw new PluginException(e);
+			}
+		}
+		classLoaders.remove(oldPlugin);
 	}
 	
 	/**
