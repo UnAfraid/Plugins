@@ -87,6 +87,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 								final URL url = path.toUri().toURL();
 								final URLClassLoader classLoader = parentClassLoader != null ? new URLClassLoader(new URL[] { url }, parentClassLoader) : new URLClassLoader(new URL[] { url });
 								for (T plugin : ServiceLoader.load(pluginClass, classLoader)) {
+									plugin.setPluginsPath(pluginsPath);
 									plugin.setJarPath(path);
 									plugin.setJarHash(FileHashUtil.getFileHash(path).toString());
 									
@@ -111,6 +112,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 		
 		// Scan general class loader for plug-ins (Debug project include)
 		for (T plugin : ServiceLoader.load(pluginClass)) {
+			plugin.setPluginsPath(pluginsPath);
 			plugin.setJarPath(PathUtil.getClassLocation(pluginClass));
 			plugin.setJarHash(IDE_MODE);
 			

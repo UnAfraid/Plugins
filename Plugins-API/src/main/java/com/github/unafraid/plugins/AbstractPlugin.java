@@ -55,6 +55,7 @@ public abstract class AbstractPlugin {
 	private final List<IPluginInstaller> installers = new ArrayList<>(Collections.singleton(fileInstaller));
 	private final AtomicReference<PluginState> state = new AtomicReference<>(PluginState.AVAILABLE);
 	private final Set<IPluginFunction<? extends AbstractPlugin>> functions = new LinkedHashSet<>();
+	private Path pluginsPath;
 	private Path jarPath;
 	private String jarHash;
 	
@@ -319,6 +320,14 @@ public abstract class AbstractPlugin {
 		return migrations;
 	}
 	
+	final void setPluginsPath(Path pluginsPath) {
+		this.pluginsPath = pluginsPath;
+	}
+	
+	public final Path getPluginsPath() {
+		return pluginsPath;
+	}
+	
 	final void setJarPath(Path jarPath) {
 		this.jarPath = jarPath;
 	}
@@ -344,7 +353,7 @@ public abstract class AbstractPlugin {
 		final String[] totalPaths = new String[paths.length + 1];
 		totalPaths[0] = getName();
 		System.arraycopy(paths, 0, totalPaths, 1, paths.length);
-		return Paths.get("plugins", totalPaths).normalize();
+		return getPluginsPath().resolve(Paths.get("", totalPaths)).normalize();
 	}
 	
 	/**
@@ -358,7 +367,7 @@ public abstract class AbstractPlugin {
 	
 	/**
 	 * Gets the string version of {@link #getAbsolutePath(String...)}, uses {@link Path#toString()}.
-	 * @param paths
+	 * @param paths path parameters given by the user
 	 * @return absolute path
 	 */
 	public final String getAbsolutePathString(String... paths) {
