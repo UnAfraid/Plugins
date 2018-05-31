@@ -21,6 +21,8 @@
  */
 package com.github.unafraid.plugins;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -119,16 +121,31 @@ public class PluginRepository<T extends AbstractPlugin> {
 		if (!plugins.containsKey(plugin.getVersion())) {
 			final T oldPlugin = plugins.put(plugin.getVersion(), plugin);
 			if (oldPlugin != null) {
+				
 				// After re-scan plugin might be changed, so stop first.
-				if (oldPlugin.getState() == PluginState.STARTED) {
+				final boolean wasStarted = oldPlugin.getState() == PluginState.STARTED;
+				if (wasStarted) {
 					try {
 						oldPlugin.stop();
 					}
 					catch (PluginException e) {
 						LOGGER.warn("Failed to stop old plugin {}", plugin.getName(), e);
 					}
-					
-					// start again
+				}
+				
+				final ClassLoader oldClassLoader = classLoaders.get(oldPlugin);
+				if (oldClassLoader instanceof Closeable) {
+					try {
+						((Closeable) oldClassLoader).close();
+					}
+					catch (IOException e) {
+						LOGGER.warn("Failed to close old classloader!", e);
+					}
+				}
+				classLoaders.remove(oldPlugin);
+				
+				// Start again.
+				if (wasStarted) {
 					if (oldPlugin.getVersion() == plugin.getVersion()) {
 						try {
 							plugin.start();
@@ -139,6 +156,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 					}
 				}
 			}
+			
 			classLoaders.put(plugin, classLoader);
 		}
 	}
