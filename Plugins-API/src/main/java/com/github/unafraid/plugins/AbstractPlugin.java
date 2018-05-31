@@ -54,6 +54,8 @@ public abstract class AbstractPlugin {
 	private final List<IPluginInstaller> installers = new ArrayList<>(Collections.singleton(fileInstaller));
 	private final AtomicReference<PluginState> state = new AtomicReference<>(PluginState.AVAILABLE);
 	private final Set<IPluginFunction<? extends AbstractPlugin>> functions = new LinkedHashSet<>();
+	private Path jarPath;
+	private String jarHash;
 	
 	/**
 	 * Gets the name of the plugin.<br>
@@ -316,6 +318,22 @@ public abstract class AbstractPlugin {
 		return migrations;
 	}
 	
+	final void setJarPath(Path jarPath) {
+		this.jarPath = jarPath;
+	}
+	
+	public final Path getJarPath() {
+		return jarPath;
+	}
+	
+	final void setJarHash(String jarHash) {
+		this.jarHash = jarHash;
+	}
+	
+	public final String getJarHash() {
+		return jarHash;
+	}
+	
 	/**
 	 * Normalises the path of the plugin.
 	 * @param paths path parameters given by the user
@@ -380,6 +398,7 @@ public abstract class AbstractPlugin {
 		result = (prime * result) + ((getAuthor() == null) ? 0 : getAuthor().hashCode());
 		result = (prime * result) + ((getCreatedAt() == null) ? 0 : getCreatedAt().hashCode());
 		result = (prime * result) + ((getDescription() == null) ? 0 : getDescription().hashCode());
+		result = (prime * result) + ((getJarHash() == null) ? 0 : getJarHash().hashCode());
 		result = (prime * result) + getVersion();
 		return result;
 	}
@@ -407,6 +426,9 @@ public abstract class AbstractPlugin {
 			return false;
 		}
 		if (!Objects.equals(getDescription(), other.getDescription())) {
+			return false;
+		}
+		if (!Objects.equals(getJarHash(), other.getJarHash())) {
 			return false;
 		}
 		if (getVersion() != other.getVersion()) {
