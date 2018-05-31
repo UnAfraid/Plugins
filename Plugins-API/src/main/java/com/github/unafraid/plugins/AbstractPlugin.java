@@ -39,6 +39,7 @@ import com.github.unafraid.plugins.installers.IPluginInstaller;
 import com.github.unafraid.plugins.installers.file.FileInstaller;
 import com.github.unafraid.plugins.migrations.PluginMigrations;
 import com.github.unafraid.plugins.util.ThrowableRunnable;
+import com.google.common.base.MoreObjects;
 
 /**
  * This class is the parent class of all plugins.<br>
@@ -436,5 +437,17 @@ public abstract class AbstractPlugin {
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("name", getName())
+			.add("author", getAuthor())
+			.add("createdAt", getCreatedAt())
+			.add("description", getDescription())
+			.add("jarHash", getJarHash())
+			.add("version", getVersion())
+			.toString();
 	}
 }
