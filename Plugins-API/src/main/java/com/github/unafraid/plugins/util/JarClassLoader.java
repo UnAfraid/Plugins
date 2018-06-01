@@ -51,16 +51,18 @@ public class JarClassLoader extends URLClassLoader {
 			loadersField.setAccessible(true);
 
 			final Object loadersCollection = loadersField.get(classPath);
-			for (Object jarClassLoader : ((Collection) loadersCollection).toArray()) {
-				try {
-					final Field jarField = jarClassLoader.getClass().getDeclaredField("jar");
-					jarField.setAccessible(true);
+			if (loadersCollection instanceof Collection) {
+				for (Object jarClassLoader : ((Collection) loadersCollection)) {
+					try {
+						final Field jarField = jarClassLoader.getClass().getDeclaredField("jar");
+						jarField.setAccessible(true);
 
-					final Object jarFile = jarField.get(jarClassLoader);
-					if (jarFile instanceof Closeable) {
-						((Closeable) jarFile).close();
+						final Object jarFile = jarField.get(jarClassLoader);
+						if (jarFile instanceof Closeable) {
+							((Closeable) jarFile).close();
+						}
+					} catch (Exception e) {
 					}
-				} catch (Exception e) {
 				}
 			}
 		} catch (Exception e) {
