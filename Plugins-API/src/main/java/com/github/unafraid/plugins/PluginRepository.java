@@ -24,7 +24,6 @@ package com.github.unafraid.plugins;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -144,32 +143,45 @@ public class PluginRepository<T extends AbstractPlugin> {
 		Objects.requireNonNull(plugin.getJarPath());
 		Objects.requireNonNull(plugin.getJarHash());
 		
-		final Map<String, T> plugins = this.plugins.computeIfAbsent(plugin.getName(), k -> new HashMap<>());
-		plugins.put(plugin.getJarHash(), plugin);
+		plugins.computeIfAbsent(plugin.getName(), k -> new HashMap<>()).put(plugin.getJarHash(), plugin);
 		classLoaders.put(plugin, classLoader);
 	}
 	
 	/**
-	 * Closes the old classloader which isn't needed anymore, and also removes it from the map.
-	 * @param oldPlugin the old plugin whose class loader needs to be cleaned
+	 * Unloads the plugin from the repository, so it can be scanned again.
+	 * @param plugin the plugin that is going to be unloaded
 	 * @throws PluginException
 	 */
-	private void cleanupClassLoader(T oldPlugin) throws PluginException {
-		final ClassLoader oldClassLoader = classLoaders.get(oldPlugin);
-		if (oldClassLoader == null) {
+	public void unload(T plugin) throws PluginException {
+		if (plugin.getState() == PluginState.STARTED) {
+			plugin.stop();
+		}
+		
+		plugins.remove(plugin.getName());
+		cleanupClassLoader(plugin);
+	}
+	
+	/**
+	 * Closes the classloader which isn't needed anymore, and also removes it from the map.
+	 * @param plugin the plugin whose class loader needs to be cleaned
+	 * @throws PluginException
+	 */
+	private void cleanupClassLoader(T plugin) throws PluginException {
+		final ClassLoader classLoader = classLoaders.get(plugin);
+		if (classLoader == null) {
 			return;
 		}
 		
-		if (oldClassLoader instanceof Closeable) {
+		if (classLoader instanceof Closeable) {
 			try {
-				((Closeable) oldClassLoader).close();
+				((Closeable) classLoader).close();
 			}
 			catch (IOException e) {
 				throw new PluginException(e);
 			}
 		}
 		
-		classLoaders.remove(oldPlugin);
+		classLoaders.remove(plugin);
 	}
 	
 	/**
