@@ -39,6 +39,7 @@ import com.github.unafraid.plugins.installers.IPluginInstaller;
 import com.github.unafraid.plugins.installers.file.FileInstaller;
 import com.github.unafraid.plugins.migrations.PluginMigrations;
 import com.github.unafraid.plugins.util.ThrowableRunnable;
+import com.google.common.base.MoreObjects;
 
 /**
  * This class is the parent class of all plugins.<br>
@@ -54,6 +55,9 @@ public abstract class AbstractPlugin {
 	private final List<IPluginInstaller> installers = new ArrayList<>(Collections.singleton(fileInstaller));
 	private final AtomicReference<PluginState> state = new AtomicReference<>(PluginState.AVAILABLE);
 	private final Set<IPluginFunction<? extends AbstractPlugin>> functions = new LinkedHashSet<>();
+	private Path pluginsPath;
+	private Path jarPath;
+	private String jarHash;
 	
 	/**
 	 * Gets the name of the plugin.<br>
@@ -317,6 +321,54 @@ public abstract class AbstractPlugin {
 	}
 	
 	/**
+	 * Sets the plugin root that is being used by plugin file installers.
+	 * @param pluginsPath the plugin root chosen by the user
+	 */
+	final void setPluginsPath(Path pluginsPath) {
+		this.pluginsPath = pluginsPath;
+	}
+	
+	/**
+	 * Gets the plugin root path that is being used by plugin file installers.
+	 * @return plugins path
+	 */
+	public final Path getPluginsPath() {
+		return pluginsPath;
+	}
+	
+	/**
+	 * Sets the JAR file's path. (internal usage only)
+	 * @param jarPath path of the JAR that contains the plugin
+	 */
+	final void setJarPath(Path jarPath) {
+		this.jarPath = jarPath;
+	}
+	
+	/**
+	 * Gets the JAR file's path that contains the plugin.
+	 * @return JAR file's path
+	 */
+	public final Path getJarPath() {
+		return jarPath;
+	}
+	
+	/**
+	 * Sets the JAR's hash. (internal usage only)
+	 * @param jarHash the hash of the JAR file that contains the plugin
+	 */
+	final void setJarHash(String jarHash) {
+		this.jarHash = jarHash;
+	}
+	
+	/**
+	 * Gets the JAR file's hash that contains the plugin.
+	 * @return JAR hash
+	 */
+	public final String getJarHash() {
+		return jarHash;
+	}
+	
+	/**
 	 * Normalises the path of the plugin.
 	 * @param paths path parameters given by the user
 	 * @return normalised path
@@ -325,7 +377,7 @@ public abstract class AbstractPlugin {
 		final String[] totalPaths = new String[paths.length + 1];
 		totalPaths[0] = getName();
 		System.arraycopy(paths, 0, totalPaths, 1, paths.length);
-		return Paths.get("plugins", totalPaths).normalize();
+		return getPluginsPath().resolve(Paths.get("", totalPaths)).normalize();
 	}
 	
 	/**
@@ -339,7 +391,7 @@ public abstract class AbstractPlugin {
 	
 	/**
 	 * Gets the string version of {@link #getAbsolutePath(String...)}, uses {@link Path#toString()}.
-	 * @param paths
+	 * @param paths path parameters given by the user
 	 * @return absolute path
 	 */
 	public final String getAbsolutePathString(String... paths) {
@@ -380,6 +432,7 @@ public abstract class AbstractPlugin {
 		result = (prime * result) + ((getAuthor() == null) ? 0 : getAuthor().hashCode());
 		result = (prime * result) + ((getCreatedAt() == null) ? 0 : getCreatedAt().hashCode());
 		result = (prime * result) + ((getDescription() == null) ? 0 : getDescription().hashCode());
+		result = (prime * result) + ((getJarHash() == null) ? 0 : getJarHash().hashCode());
 		result = (prime * result) + getVersion();
 		return result;
 	}
@@ -409,10 +462,25 @@ public abstract class AbstractPlugin {
 		if (!Objects.equals(getDescription(), other.getDescription())) {
 			return false;
 		}
+		if (!Objects.equals(getJarHash(), other.getJarHash())) {
+			return false;
+		}
 		if (getVersion() != other.getVersion()) {
 			return false;
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("name", getName())
+			.add("author", getAuthor())
+			.add("createdAt", getCreatedAt())
+			.add("description", getDescription())
+			.add("jarHash", getJarHash())
+			.add("version", getVersion())
+			.toString();
 	}
 }
