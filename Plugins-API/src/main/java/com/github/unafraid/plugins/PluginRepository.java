@@ -145,29 +145,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 		Objects.requireNonNull(plugin.getJarHash());
 		
 		final Map<String, T> plugins = this.plugins.computeIfAbsent(plugin.getName(), k -> new HashMap<>());
-		if (plugins.containsKey(plugin.getJarHash())) {
-			// Don't do anything if the JAR hash is the same.
-			return;
-		}
-		
-		final T oldPlugin = plugins.put(plugin.getJarHash(), plugin);
-		if (oldPlugin != null) {
-			final boolean wasStarted = oldPlugin.getState() == PluginState.STARTED;
-			
-			// After re-scan plugin might be changed, so stop first.
-			if (wasStarted) {
-				oldPlugin.stop();
-			}
-			
-			// ClassLoader cleanup.
-			cleanupClassLoader(oldPlugin);
-			
-			// Start again.
-			if (wasStarted) {
-				plugin.start();
-			}
-		}
-		
+		plugins.put(plugin.getJarHash(), plugin);
 		classLoaders.put(plugin, classLoader);
 	}
 	
@@ -254,7 +232,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 		return plugins.values()
 			.stream()
 			.flatMap(map -> map.values().stream())
-			.sorted(Comparator.comparingInt(T::getVersion).reversed());
+			.sorted(Comparator.comparing(T::getJarHash).reversed());
 	}
 	
 	/**
