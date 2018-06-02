@@ -35,38 +35,43 @@ public class JarClassLoader extends URLClassLoader {
 	public JarClassLoader(URL[] urls, ClassLoader parent) {
 		super(urls, parent);
 	}
-
+	
 	public JarClassLoader(URL[] urls) {
 		super(urls);
 	}
-
+	
 	@Override
 	public void close() throws IOException {
 		try {
 			final Field ucpField = getClass().getDeclaredField("ucp");
 			ucpField.setAccessible(true);
-
+			
 			final Object classPath = ucpField.get(this);
 			final Field loadersField = classPath.getClass().getDeclaredField("loaders");
 			loadersField.setAccessible(true);
-
+			
 			final Object loadersCollection = loadersField.get(classPath);
 			if (loadersCollection instanceof Collection) {
 				for (Object jarClassLoader : ((Collection) loadersCollection)) {
 					try {
 						final Field jarField = jarClassLoader.getClass().getDeclaredField("jar");
 						jarField.setAccessible(true);
-
+						
 						final Object jarFile = jarField.get(jarClassLoader);
 						if (jarFile instanceof Closeable) {
 							((Closeable) jarFile).close();
 						}
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
+						// ignore
 					}
 				}
 			}
-		} catch (Exception e) {
 		}
+		catch (Exception e) {
+			// ignore
+		}
+		
 		super.close();
 	}
 }
