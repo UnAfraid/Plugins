@@ -143,7 +143,12 @@ public class PluginRepository<T extends AbstractPlugin> {
 		Objects.requireNonNull(plugin.getJarPath());
 		Objects.requireNonNull(plugin.getJarHash());
 		
-		plugins.computeIfAbsent(plugin.getName(), k -> new HashMap<>()).putIfAbsent(plugin.getJarHash(), plugin);
+		final String pluginName = plugin.getName();
+		if (plugins.containsKey(pluginName)) {
+			return;
+		}
+		
+		plugins.computeIfAbsent(pluginName, k -> new HashMap<>()).put(plugin.getJarHash(), plugin);
 		classLoaders.put(plugin, classLoader);
 	}
 	
