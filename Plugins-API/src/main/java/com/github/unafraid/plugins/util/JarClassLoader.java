@@ -24,6 +24,8 @@ package com.github.unafraid.plugins.util;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
@@ -61,17 +63,49 @@ public class JarClassLoader extends URLClassLoader {
 						if (jarFile instanceof Closeable) {
 							((Closeable) jarFile).close();
 						}
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						// ignore
 					}
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// ignore
 		}
 		
 		super.close();
+	}
+	
+	/**
+	 * @param name the full name of the class
+	 * @return the class if this ClassLoader or its parents contains the class, null otherwise.
+	 */
+	public Class<?> getLoadedClass(String name) {
+		return findLoadedClass(name);
+	}
+	
+	/**
+	 * @param name the full name of the class
+	 * @return {@code true} if this ClassLoader or its parents contains the class, {@code false} otherwise.
+	 */
+	public boolean hasLoadedClass(String name) {
+		return findLoadedClass(name) != null;
+	}
+	
+	/**
+	 * @param name the full name of the class
+	 * @return the class if parent ClassLoader contains the class, null otherwise.
+	 */
+	public Class<?> getParentLoadedClass(String name) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		final Method findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
+		findLoadedClass.setAccessible(true);
+		return (Class<?>) findLoadedClass.invoke(getParent(), name);
+	}
+	
+	/**
+	 * @param name the full name of the class
+	 * @return {@code true} if parent ClassLoader contains the class, {@code false} otherwise.
+	 */
+	public boolean hasParentLoadedClass(String name) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		return getParentLoadedClass(name) != null;
 	}
 }

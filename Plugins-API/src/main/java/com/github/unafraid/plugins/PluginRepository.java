@@ -33,19 +33,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.unafraid.plugins.exceptions.PluginException;
 import com.github.unafraid.plugins.util.FileHashUtil;
 import com.github.unafraid.plugins.util.JarClassLoader;
 import com.github.unafraid.plugins.util.PathUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is the class that scans for available plugins.<br>
  * You can assume that it is the plugin manager. However it is a little but more.
- * @author UnAfraid
+ *
  * @param <T> refers to your own {@link AbstractPlugin} implementation abstract class, or you can use the original also
+ * @author UnAfraid
  */
 public class PluginRepository<T extends AbstractPlugin> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginRepository.class);
@@ -70,6 +71,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 	/**
 	 * This method scans your classpath for the available plugins that can be initialized.<br>
 	 * If you aren't using IDE, you may drop your plugin JARs into "plugins" directory.
+	 *
 	 * @param pluginClass here you shall provide the very same class you provided above as {@code T}
 	 */
 	public final void scan(Class<T> pluginClass) {
@@ -80,33 +82,35 @@ public class PluginRepository<T extends AbstractPlugin> {
 		try {
 			if (Files.isDirectory(pluginsPath)) {
 				Files.list(pluginsPath)
-					.filter(path -> path.getFileName().toString().endsWith(".jar"))
-					.forEach(path ->
-						{
-							try {
-								final URL url = path.toUri().toURL();
-								final JarClassLoader classLoader = parentClassLoader != null ? new JarClassLoader(new URL[] { url }, parentClassLoader) : new JarClassLoader(new URL[] { url });
-								for (T plugin : ServiceLoader.load(pluginClass, classLoader)) {
-									plugin.setPluginsPath(pluginsPath);
-									plugin.setJarPath(path);
-									plugin.setJarHash(FileHashUtil.getFileHash(path).toString());
-									
+						.filter(path -> path.getFileName().toString().endsWith(".jar"))
+						.forEach(path ->
+								{
 									try {
-										processPlugin(plugin, classLoader);
-									}
-									catch (PluginException e) {
-										LOGGER.warn("Failed to process plugin {}.", plugin, e);
+										final URL url = path.toUri().toURL();
+										final JarClassLoader classLoader = parentClassLoader != null ? new JarClassLoader(new URL[]{url}, parentClassLoader) : new JarClassLoader(new URL[]{url});
+										for (T plugin : ServiceLoader.load(pluginClass, classLoader)) {
+											if (classLoader.hasParentLoadedClass(plugin.getClass().getName())) {
+												// Skip plugins that are coming already known to parent ClassLoaders as they will be loaded below
+												continue;
+											}
+											
+											plugin.setPluginsPath(pluginsPath);
+											plugin.setJarPath(path);
+											plugin.setJarHash(FileHashUtil.getFileHash(path).toString());
+											
+											try {
+												processPlugin(plugin, classLoader);
+											} catch (Exception e) {
+												LOGGER.warn("Failed to process plugin {}.", plugin, e);
+											}
+										}
+									} catch (Exception e) {
+										LOGGER.warn("Failed to convert path: {} to URI/URL", path, e);
 									}
 								}
-							}
-							catch (Exception e) {
-								LOGGER.warn("Failed to convert path: {} to URI/URL", path, e);
-							}
-						}
-					);
+						);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.warn("Failed to scan for plugins: ", e);
 		}
 		
@@ -118,26 +122,25 @@ public class PluginRepository<T extends AbstractPlugin> {
 			
 			try {
 				processPlugin(plugin, Thread.currentThread().getContextClassLoader());
-			}
-			catch (PluginException e) {
+			} catch (Exception e) {
 				LOGGER.warn("Failed to process plugin {}.", plugin, e);
 			}
 		}
 		
 		if (previousSize != plugins.size()) {
 			LOGGER.info("Discovered {} -> {} plugin(s).", previousSize, plugins.size());
-		}
-		else if (plugins.size() != 0) {
+		} else if (plugins.size() != 0) {
 			LOGGER.info("Reloaded {} plugin(s).", plugins.size());
 		}
 	}
 	
 	/**
 	 * Processes the plugin into the plugin repository.
-	 * @param plugin the plugin
+	 *
+	 * @param plugin      the plugin
 	 * @param classLoader the class loader of the plugin
 	 */
-	private void processPlugin(T plugin, ClassLoader classLoader) throws PluginException {
+	private void processPlugin(T plugin, ClassLoader classLoader) {
 		Objects.requireNonNull(plugin);
 		Objects.requireNonNull(classLoader);
 		Objects.requireNonNull(plugin.getJarPath());
@@ -157,6 +160,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 	
 	/**
 	 * Unloads the plugin from the repository, so it can be scanned again.
+	 *
 	 * @param plugin the plugin that is going to be unloaded
 	 * @throws PluginException
 	 */
@@ -171,6 +175,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 	
 	/**
 	 * Closes the classloader which isn't needed anymore, and also removes it from the map.
+	 *
 	 * @param plugin the plugin whose class loader needs to be cleaned
 	 * @throws PluginException
 	 */
@@ -183,8 +188,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 		if (classLoader instanceof Closeable) {
 			try {
 				((Closeable) classLoader).close();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new PluginException(e);
 			}
 		}
@@ -194,6 +198,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 	
 	/**
 	 * Gets a {@link Map} view of all plugins.
+	 *
 	 * @return all plugins
 	 */
 	public final Map<String, Map<String, T>> getAllPlugins() {
@@ -209,8 +214,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 				if (plugin.setState(PluginState.INITIALIZED, PluginState.INSTALLED)) {
 					plugin.start();
 				}
-			}
-			catch (PluginException e) {
+			} catch (PluginException e) {
 				LOGGER.warn("Failed to start plugin {}", plugin.getName(), e);
 			}
 		});
@@ -223,8 +227,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 		getAvailablePlugins().forEach(plugin -> {
 			try {
 				plugin.stop();
-			}
-			catch (PluginException e) {
+			} catch (PluginException e) {
 				LOGGER.warn("Failed to stop plugin {}", plugin.getName(), e);
 			}
 		});
@@ -232,6 +235,7 @@ public class PluginRepository<T extends AbstractPlugin> {
 	
 	/**
 	 * Gets an available plugin by its name.
+	 *
 	 * @param name the plugin's name
 	 * @return available plugin
 	 */
@@ -239,24 +243,26 @@ public class PluginRepository<T extends AbstractPlugin> {
 		Objects.requireNonNull(name);
 		
 		return getAvailablePlugins()
-			.filter(plugin -> name.equalsIgnoreCase(plugin.getName()))
-			.findFirst()
-			.orElse(null);
+				.filter(plugin -> name.equalsIgnoreCase(plugin.getName()))
+				.findFirst()
+				.orElse(null);
 	}
 	
 	/**
 	 * Gets a {@link Stream} view of available plugins.
+	 *
 	 * @return available plugins
 	 */
 	public final Stream<T> getAvailablePlugins() {
 		return plugins.values()
-			.stream()
-			.flatMap(map -> map.values().stream())
-			.sorted(Comparator.comparing(T::getJarHash).reversed());
+				.stream()
+				.flatMap(map -> map.values().stream())
+				.sorted(Comparator.comparing(T::getJarHash).reversed());
 	}
 	
 	/**
 	 * Gets a class loader by the plugin.
+	 *
 	 * @param plugin the plugin
 	 * @return class loader
 	 */
