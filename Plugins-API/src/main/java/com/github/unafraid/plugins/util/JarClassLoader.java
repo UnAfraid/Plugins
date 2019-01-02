@@ -24,8 +24,6 @@ package com.github.unafraid.plugins.util;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
@@ -34,12 +32,16 @@ import java.util.Collection;
  * @author UnAfraid
  */
 public class JarClassLoader extends URLClassLoader {
+	private final ObservableClassLoader parent;
+	
 	public JarClassLoader(URL[] urls, ClassLoader parent) {
 		super(urls, parent);
+		this.parent = new ObservableClassLoader(parent);
 	}
 	
 	public JarClassLoader(URL[] urls) {
 		super(urls);
+		this.parent = new ObservableClassLoader(getParent());
 	}
 	
 	@Override
@@ -95,17 +97,15 @@ public class JarClassLoader extends URLClassLoader {
 	 * @param name the full name of the class
 	 * @return the class if parent ClassLoader contains the class, null otherwise.
 	 */
-	public Class<?> getParentLoadedClass(String name) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		final Method findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
-		findLoadedClass.setAccessible(true);
-		return (Class<?>) findLoadedClass.invoke(getParent(), name);
+	public Class<?> getParentLoadedClass(String name) {
+		return parent.getLoadedClass(name);
 	}
 	
 	/**
 	 * @param name the full name of the class
 	 * @return {@code true} if parent ClassLoader contains the class, {@code false} otherwise.
 	 */
-	public boolean hasParentLoadedClass(String name) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		return getParentLoadedClass(name) != null;
+	public boolean hasParentLoadedClass(String name) {
+		return parent.hasLoadedClass(name);
 	}
 }
